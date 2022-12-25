@@ -13,10 +13,6 @@ struct GuitarOSApp: App {
         WindowGroup {
             VStack {
                 GridView(rows: 5.0, cols: 5.0, gridColor: .black)
-                GridView(rows: 5.0, cols: 5.0, gridColor: .black)
-                GridView(rows: 5.0, cols: 5.0, gridColor: .black)
-                GridView(rows: 5.0, cols: 5.0, gridColor: .black)
-                GridView(rows: 5.0, cols: 5.0, gridColor: .black)
             }
             .padding()
         }
