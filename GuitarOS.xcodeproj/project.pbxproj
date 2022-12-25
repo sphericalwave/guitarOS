@@ -12,6 +12,8 @@
 		AF72C7932958A64F007A2CA8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AF72C7922958A64F007A2CA8 /* Assets.xcassets */; };
 		AF72C7962958A64F007A2CA8 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AF72C7952958A64F007A2CA8 /* Preview Assets.xcassets */; };
 		AF72C79D2958AB8E007A2CA8 /* Coordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF72C79C2958AB8E007A2CA8 /* Coordinate.swift */; };
+		AF72C79F2958AFFB007A2CA8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AF72C79E2958AFFB007A2CA8 /* LaunchScreen.storyboard */; };
+		AF72C7A22958B1C7007A2CA8 /* prs.png in Resources */ = {isa = PBXBuildFile; fileRef = AF72C7A12958B1C7007A2CA8 /* prs.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +23,8 @@
 		AF72C7922958A64F007A2CA8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AF72C7952958A64F007A2CA8 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		AF72C79C2958AB8E007A2CA8 /* Coordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinate.swift; sourceTree = "<group>"; };
+		AF72C79E2958AFFB007A2CA8 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		AF72C7A12958B1C7007A2CA8 /* prs.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = prs.png; path = assets/prs.png; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +61,8 @@
 				AF72C7902958A64C007A2CA8 /* GridView.swift */,
 				AF72C79C2958AB8E007A2CA8 /* Coordinate.swift */,
 				AF72C7922958A64F007A2CA8 /* Assets.xcassets */,
+				AF72C7A12958B1C7007A2CA8 /* prs.png */,
+				AF72C79E2958AFFB007A2CA8 /* LaunchScreen.storyboard */,
 				AF72C7942958A64F007A2CA8 /* Preview Content */,
 			);
 			path = GuitarOS;
@@ -128,6 +134,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AF72C7A22958B1C7007A2CA8 /* prs.png in Resources */,
+				AF72C79F2958AFFB007A2CA8 /* LaunchScreen.storyboard in Resources */,
 				AF72C7962958A64F007A2CA8 /* Preview Assets.xcassets in Resources */,
 				AF72C7932958A64F007A2CA8 /* Assets.xcassets in Resources */,
 			);
@@ -277,6 +285,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -306,6 +315,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
