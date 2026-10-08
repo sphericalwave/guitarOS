@@ -1,0 +1,438 @@
+# guitar — practice app plan
+
+Status: planning only. No app code yet. Written 2026-10-08 after reading this repo, the sibling
+piano app (`../piano`, incl. `feat/mic-note-detection`), `~/Documents/apps/Frameworks`, and the
+strike/shodan flashcard apps.
+
+---
+
+## 0. What exists today
+
+- Xcode 14-era project (`GuitarOS.xcodeproj`, 2022), iOS-only, iOS 16.1, Swift 5, portrait locked
+  (good — keep that).
+- `GridView` (a `Path` grid with a row of tappable dots), `Note` (a circle view), `Coordinate`.
+  Prototype-grade; nothing worth carrying forward except the idea of a vertical fretboard grid.
+- App icon (PRS headstock), launch storyboard, `assets/guitarOS.sketch`, `icon/prsHeadstock.svg`.
+- **Uncommitted WIP in the main checkout** (`GridView`, `Note`, `Coordinate`, `project.pbxproj`,
+  untracked `icon/`). This plan doesn't touch it. Commit or discard it before M0, since M0 replaces
+  the project.
+
+**Decision:** start over on a modern project (M0) and keep the icon and splash assets.
+Don't try to upgrade the 2022 project.
+
+---
+
+## 1. Target user and core practice loop
+
+**User:** the owner, an intermediate guitarist who already plays well but wants fluency: knowing
+every note on the neck, scales/modes/CAGED without thinking, cleaner and faster chord changes,
+better time, and a better ear. The user doesn't read standard notation (see piano CLAUDE.md), so
+tab, fretboard diagrams and chord grids are the notation. Practice happens with the phone on a
+music stand or the Mac on a desk, guitar in hand. **Hands are busy**, which drives most UX choices.
+
+**Core loop (one session ≈ 15–30 min):**
+
+1. Open the app → **Today** shows one button: *Start today's practice (20 min)*.
+2. The app builds the routine from what's due: a tuning check → due fretboard cards → the weakest
+   chord change → one scale/CAGED position at a target BPM → (later) ear and song blocks.
+3. Each block listens through the mic and grades itself. No tapping "correct/incorrect" with a
+   pick in your hand.
+4. End screen: what improved (best change speed, new cards mastered, BPM gained), streak, and
+   what's due tomorrow.
+5. Progress tab: calendar heatmap, minutes per week, per-skill trends.
+
+The differentiator: **auto-graded spaced repetition for motor skills.** Each fret position, chord
+change, scale shape and interval is a card. The mic measures correctness plus response time, and
+that becomes the SM-2 quality grade. You practise what you're slow at, not what you like.
+
+---
+
+## 2. Feature set, ranked
+
+| Rank | Feature | Input | Notes |
+|---|---|---|---|
+| **MVP** | Tuner | mic (mono) | Needle + cents, auto string detect, alternate tunings. Also the mic health check. |
+| **MVP** | Fretboard note trainer | mic + tap | "Play F♯ on the G string" (mic) / "Name this dot" (tap, silent mode). SR per position. |
+| **MVP** | Practice log, Today, streaks, charts | — | Sessions → blocks; ChartKit heatmap + period bars. |
+| **MVP** | Metronome | output | Sample-accurate click engine. The same clock later judges rhythm. |
+| **MVP** | Chord library (small) + one-minute changes, self-counted | tap | ~40 voicings (open, E/A-shape barres, power). User counts changes; best-per-pair tracked. |
+| 2 | Chord-change trainer, auto-detected | mic (score-informed) | Strum onset + verify the expected voicing → clean changes/min. |
+| 3 | Scales / modes / CAGED | mic (mono sequence) | Generated positions; play-along at BPM with auto speed-up after clean passes. |
+| 4 | Rhythm trainer | mic onsets | Strum/pick on the click; early/late histogram (ChartKit `NormalDistributionChart`). |
+| 5 | Ear training | tap + mic | Intervals, chord quality, scale degree in key, **play-back-what-you-hear** (mic). |
+| 6 | Tab / song play-along | mic (mono + score-informed) | MIDI import + auto tab, then Guitar Pro 7/8 `.gp`. Wait mode + play-along. |
+| 7 | Theory flashcards | tap | Generated from the theory engine ("3rd of D major?", "notes of A Dorian?"). |
+| 8 | MIDI guitar input | CoreMIDI | Per-string channels (Fishman TriplePlay, Jamstik) give the string; optional. |
+| 9 | Lesson scrolls | — | strike/ScrollKit pattern for any guitar course videos → chapters → cards. Only if source material exists. |
+
+Explicitly **not** planned: lessons/curriculum content, social, a backing-track library, AI chord
+transcription of arbitrary recordings, landscape.
+
+---
+
+## 3. Input approach
+
+### 3.1 Signal path
+- One shared `AVAudioEngine` for mic in + click/reference tones out, so only one audio session
+  ever exists.
+- iOS session: `.playAndRecord`, mode `.measurement` (no AGC/voice processing), `.defaultToSpeaker`,
+  `.allowBluetoothA2DP`, 5 ms IO buffer. Copy piano's `AudioRecordingSession` adapter as-is.
+- **Input picker.** USB interfaces (iRig, Scarlett) on iPhone and Mac give a clean DI signal. That's
+  a big accuracy win, and an *unplugged electric is nearly silent* to a mic. Show the active input and
+  its level everywhere listening happens.
+- Bluetooth output adds 150–250 ms. Compensate using `outputLatency` and warn on BT routes. Offer a
+  tap-along latency calibration once (Settings).
+
+### 3.2 Single notes (tuner, fretboard, scales, ear play-back): YIN
+- Piano's `YINPitchDetector` + `OnsetDetector` + `NoteTracker` carry over directly.
+- Guitar range: fundamentals ~55 Hz (drop tunings, 7-string B1 = 61.7 Hz) to ~1.4 kHz (24th fret
+  E6). That allows a **much shorter window than piano** (piano must reach A0 = 27.5 Hz): ~2048
+  samples at 48 kHz, so ~30–45 ms detection latency vs piano's ~64 ms. The guitar profile sets
+  `minFrequency: 55, maxFrequency: 1500`.
+- The tuner uses a longer window and median smoothing for cent stability. Latency matters less there.
+- **Limit (stated in UI copy):** pitch doesn't identify the string. E4 is open high E, B-string
+  fret 5 and G-string fret 9. The trainer prompts for an exact pitch and trusts that it was played on
+  the asked string. String identification from timbre is research-grade. MIDI guitar solves it.
+
+### 3.3 Chords: score-informed verification, not transcription
+Blind polyphonic transcription of a strummed guitar is unreliable. **The app always knows which
+voicing it asked for**, so it verifies instead of transcribing:
+
+- After a strum onset, take frames ~60–180 ms post-onset (past the pick noise, before decay).
+- For each expected string note, compute harmonic salience (the template approach from piano's
+  `PolyphonicNoteEstimator`, retuned: guitar inharmonicity is low, 12 partials is enough, range
+  E2–E6).
+- Per-string verdict: **present / weak (muted, buzzing) / missing**, plus "strong unexpected note"
+  for a wrong fret. Octave-doubled notes (C3 + C4 in open C) are inherently ambiguous, so verify
+  pitch classes plus the bass note strictly and treat octave doublings leniently.
+- Output: a `ChordVerdict` (clean / partial with string list / wrong / no strum). The UI lights the
+  failing string on the chord grid. That's useful feedback, not just pass/fail.
+- New type `ChordVerifier`. It uses piano's `Prior.expected` idea but scores only the template set,
+  which is cheaper and more robust than a full search.
+- The app's own sound (click, reference tones, backing) goes into `Prior.suppressed`, as piano
+  already does.
+
+### 3.4 Rhythm
+Strum and pick timing come from `OnsetDetector` alone, no pitch needed. Mic timestamps map to host
+time, then to beat time on the click clock, with detector latency subtracted (piano's
+`MicrophoneCapture.latency`).
+
+### 3.5 MIDI guitar (later, optional)
+Reuse piano's `MIDIInputClient`. Its `MIDIWordDecoder` currently drops channel and pitch bend.
+Guitar needs both: channel = string in per-string mode, bend = bends. Extend the decoder rather than
+fork it.
+
+### 3.6 Test fixtures
+Mirror piano's `PianoToneSynth` with a **Karplus–Strong `GuitarToneSynth`** (single notes, strums
+with per-string delays, muted strings) so detection is unit-tested without audio files. Add ~20 short
+real recordings later for regression (open question 6).
+
+---
+
+## 4. Data model (SwiftData, CloudKit-safe)
+
+Rules (same as piano): every stored property optional or defaulted, no `@Attribute(.unique)`, every
+relationship optional with an inverse, blobs `@Attribute(.externalStorage)`. **No "wipe the store on
+load failure" recovery, ever** (see global CLAUDE.md §7). On load failure, show an error and keep
+the file.
+
+Static content (scales, modes, CAGED shapes, chord voicings, tunings) is **code/bundled JSON, not
+SwiftData**. Only user state syncs.
+
+```swift
+@Model final class PracticeSession {          // one sitting
+    var startedAt: Date = Date.now
+    var duration: TimeInterval = 0
+    var goalMinutes: Int = 20                 // snapshot, so old days chart correctly
+    @Relationship(deleteRule: .cascade, inverse: \PracticeBlock.session)
+    var blocks: [PracticeBlock]? = []
+}
+
+@Model final class PracticeBlock {            // one drill within a sitting
+    var kind: String = ""                     // DrillKind raw: tuner, fretboard, chordChange, scale, rhythm, ear, song
+    var title: String = ""                    // "C → G", "A minor pent, pos 1"
+    var duration: TimeInterval = 0
+    var attempts: Int = 0
+    var correct: Int = 0
+    var bpm: Int?                             // when a click was running
+    var score: Double?                        // kind-specific: changes/min, timing σ ms, accuracy
+    var session: PracticeSession?
+    var song: Song?
+}
+
+@Model final class SkillCard: SpacedRepetitionCard {   // ScrollKit SM-2
+    var kind: String = ""                     // fretPosition, chordShape, chordChange, scaleShape, interval, theory
+    var key: String = ""                      // stable id: "fret:std:s3f7", "change:C-open>G-open"
+    var attempts: Int = 0
+    var correct: Int = 0
+    var meanResponse: Double = 0              // seconds, rolling
+    var best: Double?                         // e.g. best changes/min, best BPM
+    var lastPracticed: Date?
+    var srInterval: Int = 1
+    var srEasinessFactor: Double = 2.5
+    var srRepetitions: Int = 0
+    var srDueDate: Date = Date.now
+}
+
+@Model final class Song {                     // M9
+    var title: String = ""
+    var artist: String = ""
+    @Attribute(.externalStorage) var sourceData: Data?
+    var sourceFormat: String = ""             // midi, gp
+    var tuning: String = "E2 A2 D3 G3 B3 E4"  // string, not Codable struct — sync-safe
+    var capo: Int = 0
+    var lastPosition: TimeInterval = 0
+    var bestAccuracy: Double?
+    @Relationship(deleteRule: .nullify, inverse: \PracticeBlock.song)
+    var blocks: [PracticeBlock]? = []
+}
+```
+
+- **Streaks and daily totals are computed from sessions, never stored.** Stored counters conflict
+  across devices.
+- **Cards are created lazily** the first time a key is practised, not seeded 78 at a time. That cuts
+  CloudKit duplicates when two devices start fresh. A launch-time dedupe pass merges same-`key` cards
+  (keep max repetitions, sum attempts, earliest due).
+- Auto-grade → SM-2 quality: wrong = 1; right in > 5 s = 3; < 5 s = 4; < 2 s = 5 (thresholds per
+  kind, tuned in M3).
+- Settings live in `@AppStorage`: tuning, reference A (440 default), left-handed flip, sharps/flats,
+  daily goal minutes, fret range, input sensitivity, last BPM.
+- **Data survival:** every model is new, so nothing migrates in v1. Each later addition must be an
+  optional/defaulted property → lightweight migration. State this in each schema-changing PR.
+
+---
+
+## 5. Architecture
+
+Follow global CLAUDE.md and copy **strike's XcodeGen layout** (it already does the
+Shared/iOS/macOS split with `destinationFilters`).
+
+```
+guitar/
+  project.yml                      # XcodeGen; iOS 26 + macOS 26, Swift 6, MainActor default isolation
+  Sources/
+    Shared/
+      App/GuitarApp.swift          # composition roots call into platform wiring
+      Models/                      # SwiftData models above
+      Engine/                      # pure, nonisolated, unit-tested — no SwiftUI
+        Fretboard/                 # Tuning, FretPosition, Fretboard (pitch↔positions), FretboardLayout
+        Chords/                    # ChordVoicing, ChordLibrary (bundled), ChordVerifier
+        Scales/                    # ScaleShape, CAGED, positions generator
+        Practice/                  # DrillPrompt generators, AutoGrade, RoutineBuilder, RhythmJudge
+        Audio/                     # ClickTrack, GuitarToneSynth (Karplus–Strong), GuitarPitchProfile
+      ViewModels/                  # TodayViewModel, TunerViewModel, FretboardDrillViewModel, ...
+      Services/                    # AudioHub (one engine), InputMonitor, CardStore (lazy create + dedupe)
+      PlatformAdapters/            # AudioRecordingSession, KeepAwake, Haptics?, FileImporting
+      Views/Components/            # FretboardView, ChordGridView, PitchNeedle, LevelMeter (identical on both)
+    iOS/
+      App/RootView.swift           # TabView, @AppStorage("guitarSelectedTab")
+      Views/<Feature>/<Feature>View.swift
+      PlatformAdapters/            # AudioRecordingSession+iOS (copy from piano), KeepAwake+iOS (idleTimer)
+    macOS/
+      App/RootView.swift           # NavigationSplitView sidebar
+      Views/<Feature>/<Feature>View.swift
+      PlatformAdapters/
+  Tests/                           # Swift Testing
+```
+
+- **Concurrency:** like piano, `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`. Audio and DSP types are
+  `nonisolated`. Analysis runs on the capture thread (piano's `MicrophoneCapture` sink-node + ring
+  buffer design) and publishes `AsyncStream<PitchUpdate>`.
+- **ViewModels** take adapters by init injection (`AudioRecordingSession`, `KeepAwake`). Each
+  platform's `App` file wires the concrete ones. No UIKit/AppKit in `Shared/`.
+- `Haptics` exists only on iOS → `Haptics?` optional, nil on macOS.
+- Each feature is scaffolded as three files: `Shared/ViewModels/XViewModel.swift`,
+  `iOS/Views/X/XView.swift`, `macOS/Views/X/XView.swift`.
+- Rendering: `Canvas` + `TimelineView`, with a pure `…Layout` struct that is unit-tested. That's
+  piano's `KeyboardLayout`/`StaffStripLayout` pattern.
+- Bundle id `com.sphericalwave.music.guitar`. Packages: DiagnosticsKit (remote), ScrollKit,
+  ChartKit, plus the new ones below (local path during development, like strike).
+
+---
+
+## 6. Reuse: extract vs copy vs use
+
+### Use as-is
+| Package | For |
+|---|---|
+| **DiagnosticsKit** | Error log + `AudioSessionMonitor` (route changes when an interface is plugged in). Suite standard. |
+| **ScrollKit** | `SM2` + `SpacedRepetitionCard` for `SkillCard`. Later `ScrollManifest`/`Cloze` if lesson scrolls happen. |
+| **ChartKit** | `CalendarHeatmap` (streak), `PeriodBarChart` (minutes), `PeriodGoalBarChart` (daily goal), `NormalDistributionChart` (timing offsets), `SlopeColoredLineChart` (changes/min trend). |
+| **SwDesignSystem** | Selectively: `SwTheme`, toasts/`Popup`, `CircularProgressView` (goal ring). Several files are UIKit-only behind `canImport`; check each component on macOS before using it. |
+
+### Extract into new shared packages (piano and guitar both depend on them)
+| New package | Contents (from piano) | When |
+|---|---|---|
+| `Frameworks/Music/MusicTheoryKit` | `PitchName`, `SpelledPitch`, `NoteLetter`/`Accidental`, `PitchSpelling`, `KeyDescription`, `Chord` (its doc comment already says "as a guitarist reads it"), `ChordAnalysis`, `RomanNumeral`. Add `Interval`, `Scale`, `Mode` here (new, written for guitar, useful for piano). | **M1.** Stable, pure, on piano `main`. |
+| `Frameworks/Audio/PitchKit` | `SpectrumAnalyzer`, `YINPitchDetector`, `OnsetDetector`, `NoteTracker`, `PolyphonicNoteEstimator` (parameterised by an `InstrumentProfile`: range, inharmonicity, partial count; piano and guitar profiles), `MicrophoneCapture`, `Prior`, `AudioRecordingSession` protocol + iOS/macOS impls. | **M2, after piano merges `feat/mic-note-detection`.** Switch piano to the package in the same change. `PreciseTempermentKit` also has its own YIN + SpectrumAnalyzer copy, so dedupe it onto PitchKit later. |
+| `Frameworks/Music/PlayAlongKit` | `PlayAlongJudge`, `WaitGate`, `WaitRunner`, `InputMerger`, `NoteEvent` (was `KeyboardEvent`), `ListeningPrior`. Generalise from `Score` + `Hand` to `[ExpectedEvent]` (id, time, pitches, part), so guitar strings/parts and piano hands both fit. | **M7** (first guitar use: scale play-along). Not earlier, because the right generalisation shows up with the second user. |
+| MIDI file + CoreMIDI (`MIDIFile`, `TempoMap`, `Score+MIDI`, `MIDIInputClient`, `MIDIWordDecoder`) | Song import + MIDI guitar. | **M9.** Defer. Name it `ScoreKit` (avoid clashing with the open-source "MIDIKit"). |
+
+### Copy the pattern, not the code
+- **`AutoFingering`** is piano-specific (finger spans). Guitar needs a different problem solved:
+  assigning (string, fret) to each MIDI note. The same **DP/Viterbi approach** applies:
+  `GuitarTabAssigner` with costs for fret distance, position shifts, open-string preference, chord
+  span ≤ 4–5 frets. Piano's tests-against-known-fingerings approach carries over.
+- **`FallingNotesView` / `StaffStripView`** are piano-keyboard and grand-staff specific. Write
+  `TabStripView`: 6 lines, fret numbers, playhead, same `TimelineView`+`Canvas`+tested layout
+  struct design. Chord names above it via `ChordAnalysis` spans, as the staff strip does.
+- **`PracticeLog`/`Song`** model shapes → adapted above.
+- **`PlaybackEngine` metronome/count-in** → piano schedules clicks through an
+  `AVAudioUnitSampler` sequence. Guitar has no song for M5, so write a standalone `ClickTrack`
+  (`AVAudioSourceNode`, sample-accurate against a host-time anchor). It's simple and exposes
+  beat↔host-time for judging. Piano can adopt it later.
+- **strike's `ReviewQueueViewModel`** (fixed queue, grades, forecast) → template for
+  `FretboardDrillViewModel`'s queue. Grading comes from audio, not buttons.
+
+---
+
+## 7. UX flows (per the UX laws in global CLAUDE.md)
+
+**Navigation (iOS):** 4 tabs, `@AppStorage("guitarSelectedTab")`, portrait only.
+**Today · Practice · Progress · Tools.** Songs is added as a tab only at M9 (Hick's law: no empty
+tabs). macOS uses a sidebar with the same sections; tuner and metronome open in a utility window.
+
+**Tuner is one tap from anywhere** (toolbar tuning-fork button). Guitarists retune mid-session
+(Jakob, Fitts).
+
+### Today (primary flow)
+- One dominant button, *Start today's practice*, with the routine preview below it (4–5 rows with
+  minutes) and a goal ring (Von Restorff, Hick, sensible default 20 min).
+- Each row can be swapped or skipped from a context menu (defaults are easy to change).
+- In-session: a progress bar across blocks ("Block 2 of 4 · 6 min left"). Every block saves when it
+  finishes, so a phone call doesn't lose the session, and Today offers *Resume* (Zeigarnik,
+  goal-gradient, errors recoverable).
+- **End screen:** highlight + totals + streak + "Tomorrow: 12 cards, C→G change" (peak-end). Never
+  end on a blank list.
+
+### Fretboard trainer
+- Vertical fretboard (headstock up) fills the lower half in portrait. The existing GridView's
+  instinct was right. Prompt in huge type above: **"F♯ — G string"**.
+- Live detected note + level meter appear within ~50 ms of playing (Doherty). Green flash +
+  haptic on correct; on wrong, show what was heard and where it lives on the asked string. Then
+  move on: no extra tap needed (Parkinson).
+- Silent mode (tap the 12 note names, big buttons in a 4×3 grid) for when you can't play aloud.
+  Mode toggle in the toolbar; it remembers the last mode.
+- Scope picker (strings, fret range, naturals only) sits behind a "Customize" disclosure. The
+  default is "due cards" (Tesler, progressive disclosure).
+
+### Chord changes
+- Two chord grids side by side, a big **Start 1:00** button, metronome optional.
+- v1: one giant tap target fills the screen to count changes (tap with the strumming hand's knuckle
+  between strums). v2 (M6): auto-count, and the failing string flashes on the grid.
+- Result: "34 changes/min · best 31 → **new best**".
+
+### Tuner
+- Needle + cents + note, auto string detection, big "in tune" state. Tuning picker shows the
+  standard default first.
+- Doubles as the **mic check**: if level stays near silence for 3 s, show "Can't hear the guitar →
+  pick input / check permission" with the fix button inline (errors explained, recoverable).
+
+### Metronome
+- BPM field follows the last-entered-value placeholder rule (empty field, grey last BPM, empty means
+  reuse it). Tap tempo, ± buttons, accent pattern behind disclosure.
+
+### Permissions
+- Ask for the mic on first use of a mic drill, never at launch, after one sentence on why. If denied,
+  every mic drill offers its tap-mode equivalent plus a Settings link (`privacySettingsURL`, as piano
+  does).
+
+### Left-handed
+- One setting mirrors every fretboard and chord grid. Default comes from the first-run question
+  "Which hand frets?" (one question, prefilled right).
+
+---
+
+## 8. Milestones
+
+Each milestone builds on iOS **and** macOS with tests passing before the next starts (piano's rule).
+The user builds and runs. Agents run tests only when asked.
+
+### MVP (M0–M5)
+
+**M0: Project reset**
+- [ ] Commit/discard current WIP; tag `prototype-2022`.
+- [ ] XcodeGen `project.yml` (strike pattern): iOS 26 + macOS 26, Swift 6, MainActor default
+      isolation, portrait-only, bundle id `com.sphericalwave.music.guitar`, CloudKit container,
+      mic usage strings.
+- [ ] Carry over AppIcon + launch logo; regenerate via the icon skill if needed.
+- [ ] `Shared/iOS/macOS` skeleton, RootView per platform, `@AppStorage` tab, DiagnosticsKit wired.
+- [ ] Swift Testing smoke test.
+
+**M1: Theory + fretboard core (pure)**
+- [ ] Extract `MusicTheoryKit` from piano; switch piano to it (separate piano PR).
+- [ ] Add `Interval`, `Scale`, `Mode` (+ tests).
+- [ ] `Tuning` (standard, drop D, DADGAD, open G/D, half-step down; custom later), `FretPosition`,
+      `Fretboard.positions(of:)`, `pitch(at:)`.
+- [ ] `FretboardLayout` (realistic compressed fret spacing, left-handed mirror) + tests;
+      `FretboardView` (Canvas) shared component.
+
+**M2: Listening + tuner**
+- [ ] Extract `PitchKit` (after piano merges mic branch); `InstrumentProfile.guitar`.
+- [ ] `AudioHub` (one engine), input picker, level meter, permission flow.
+- [ ] `GuitarToneSynth` test fixtures; YIN accuracy tests E2–E6 ±3 cents.
+- [ ] Tuner screen (both platforms).
+
+**M3: Fretboard note trainer**
+- [ ] `SkillCard` + `CardStore` (lazy create, dedupe pass) + `AutoGrade`.
+- [ ] Find-the-note (mic) and name-the-note (tap) drills; due-queue + customize scope.
+- [ ] Per-position mastery heatmap on the fretboard.
+
+**M4: Log, Today, Progress**
+- [ ] `PracticeSession`/`PracticeBlock`; block-level autosave + resume.
+- [ ] `RoutineBuilder` (due cards first, goal minutes); Today screen; end-of-session screen.
+- [ ] Progress: ChartKit heatmap, minutes/week vs goal, streak (computed).
+
+**M5: Metronome + self-counted chord changes**
+- [ ] `ClickTrack` (sample-accurate, tap tempo, accents) + Metronome tool.
+- [ ] `ChordLibrary` (~40 bundled voicings) + `ChordGridView`.
+- [ ] One-minute changes with tap counter; `chordChange` cards with `best`; trend chart.
+
+**MVP done:** a daily routine of tuner check → fretboard cards → chord change, logged with a streak,
+on iPhone and Mac.
+
+### After MVP
+- **M6: Auto chord-change detection.** `ChordVerifier` (score-informed), strum onsets, per-string
+  feedback; synthetic strum tests + real recordings.
+- **M7: Scales/modes/CAGED.** Shape generator, `PlayAlongKit` extraction, wait mode + timed mode,
+  speed trainer (+N BPM per clean pass), `scaleShape` cards.
+- **M8: Rhythm trainer.** Onset vs click, timing histogram, subdivision drills.
+- **M9: Ear training.** Intervals, chord quality, functional scale degrees, mic play-back
+  (Karplus–Strong reference tones; sampler later).
+- **M10: Songs.** `ScoreKit` extraction, MIDI import + `GuitarTabAssigner`, `TabStripView`,
+  wait/play-along, loop + slow-down; then Guitar Pro 7/8 `.gp` (zip + GPIF XML, already has
+  string/fret).
+- **M11: Extras.** MIDI guitar, theory flashcards, lesson scrolls.
+
+---
+
+## 9. Risks
+
+- **Mic accuracy in real rooms** (fan noise, quiet unplugged electric). Mitigations: interface
+  input, sensitivity setting, tap-mode fallback in every drill.
+- **Chord verification false negatives** frustrate fast. Ship M5 self-counted first, and only
+  replace it when M6 beats the user's own count on recorded tests.
+- **Extraction coupling with piano:** PitchKit extraction waits for the piano branch to merge. If it
+  stalls, guitar copies the files with a `// copied from piano@<sha>` header and extracts later.
+- **CloudKit duplicate cards** → lazy creation + dedupe pass (M3), with a test.
+
+---
+
+## 10. Open questions
+
+1. **Primary guitar for practice: acoustic or electric (through an interface or not)?** This decides
+   whether M2 optimises for mic-in-room or DI input, and whether an interface is "recommended" or
+   "assumed".
+2. **Is macOS a real target for v1, or iPhone-first with the Mac later?** The plan keeps the split
+   from day one either way, but Mac-for-MVP doubles UI work in M0–M5.
+3. **Where will songs come from (M10)?** MIDI files (like piano), Guitar Pro files (Songsterr/
+   Ultimate Guitar exports), or both? This decides whether the MIDI→tab assigner or the GP parser
+   comes first.
+4. Name: keep **GuitarOS** (repo/icon) or go suite-lowercase **guitar** like piano/strike?
+5. Deployment target iOS/macOS 26 (matches piano; PitchKit's `Synchronization` needs 18+) OK?
+6. Willing to record ~20 short real clips (single notes, a few strummed chords, muted strings) as
+   test fixtures?
+7. Tuner reference: A440 only, or also Precise Temperament (piano's default)? Frets are 12-TET, so
+   PT only means anything for open strings. Recommend A440 + adjustable A, no PT.
+8. Any guitar course videos worth turning into scrolls/flashcards (ScrollKit pattern), or drop M11
+   scrolls?
