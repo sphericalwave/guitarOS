@@ -77,9 +77,18 @@ transcription of arbitrary recordings, landscape.
   ever exists.
 - iOS session: `.playAndRecord`, mode `.measurement` (no AGC/voice processing), `.defaultToSpeaker`,
   `.allowBluetoothA2DP`, 5 ms IO buffer. Copy piano's `AudioRecordingSession` adapter as-is.
-- **Input picker.** USB interfaces (iRig, Scarlett) on iPhone and Mac give a clean DI signal. That's
-  a big accuracy win, and an *unplugged electric is nearly silent* to a mic. Show the active input and
-  its level everywhere listening happens.
+- **Two supported inputs, both first-class** (the user's main guitar is an electric, usually
+  unplugged, with a small USB interface on hand):
+  1. **Built-in mic, unplugged electric (default).** An unplugged electric is quiet: ~20–30 dB
+     below an acoustic. The `unpluggedElectric` input profile defaults to higher sensitivity and a
+     lower silence gate (piano's −65 dBFS gate is too high). First-run tip: "Put the phone/Mac within
+     an arm's length of the strings." The tuner's level meter is the check.
+  2. **USB interface (DI).** Picked automatically when plugged in (route-change notification via
+     DiagnosticsKit's `AudioSessionMonitor`), switchable in the input picker. Clean signal, no
+     speaker bleed, so it's the best mode for song play-along with backing. **Input monitoring**
+     toggle (on by default with a DI input and headphones): with no amp, you hear nothing unless the
+     app passes the guitar through. Off when the route is the built-in speaker, to avoid feedback.
+- Show the active input and its level everywhere listening happens.
 - Bluetooth output adds 150–250 ms. Compensate using `outputLatency` and warn on BT routes. Offer a
   tap-along latency calibration once (Settings).
 
@@ -195,6 +204,8 @@ SwiftData**. Only user state syncs.
   (keep max repetitions, sum attempts, earliest due).
 - Auto-grade → SM-2 quality: wrong = 1; right in > 5 s = 3; < 5 s = 4; < 2 s = 5 (thresholds per
   kind, tuned in M3).
+- The guitar's settings (tuning, reference A) are mirrored to `NSUbiquitousKeyValueStore`, so the
+  Mac and phone agree about the guitar. Everything else is per-device.
 - Settings live in `@AppStorage`: tuning, reference A (440 default; 432 preset; custom 415–466), left-handed flip, sharps/flats,
   daily goal minutes, fret range, input sensitivity, last BPM.
 - **Data survival:** every model is new, so nothing migrates in v1. Each later addition must be an
@@ -362,8 +373,9 @@ The user builds and runs. Agents run tests only when asked.
 **M0: Project reset**
 - [ ] Commit/discard current WIP; tag `prototype-2022`.
 - [ ] XcodeGen `project.yml` (strike pattern): iOS 26 + macOS 26, Swift 6, MainActor default
-      isolation, portrait-only, bundle id `com.sphericalwave.music.guitar`, CloudKit container,
-      mic usage strings.
+      isolation, portrait-only (iOS), bundle id `com.sphericalwave.music.guitar`, **CloudKit
+      container + iCloud entitlements on both iOS and macOS from day one**, remote-notification
+      background mode (CloudKit push), mic usage strings, macOS audio-input sandbox entitlement.
 - [ ] Carry over AppIcon + launch logo; regenerate via the icon skill if needed.
 - [ ] `Shared/iOS/macOS` skeleton, RootView per platform, `@AppStorage` tab, DiagnosticsKit wired.
 - [ ] Swift Testing smoke test.
@@ -378,7 +390,9 @@ The user builds and runs. Agents run tests only when asked.
 
 **M2: Listening + tuner**
 - [ ] Extract `PitchKit` (after piano merges mic branch); `InstrumentProfile.guitar`.
-- [ ] `AudioHub` (one engine), input picker, level meter, permission flow.
+- [ ] `AudioHub` (one engine), input picker (built-in mic / USB interface, auto-switch on plug-in),
+      level meter, permission flow, input monitoring for DI.
+- [ ] `unpluggedElectric` + `di` input profiles; tune gate/sensitivity on the real guitar.
 - [ ] `GuitarToneSynth` test fixtures; YIN accuracy tests E2–E6 ±3 cents.
 - [ ] Tuner screen (both platforms) with reference pitch 440 / 432 / custom, applied app-wide;
       tests: synthetic A432-tuned strings read as in tune at 432 and −31.8 cents at 440.
@@ -392,6 +406,7 @@ The user builds and runs. Agents run tests only when asked.
 - [ ] `PracticeSession`/`PracticeBlock`; block-level autosave + resume.
 - [ ] `RoutineBuilder` (due cards first, goal minutes); Today screen; end-of-session screen.
 - [ ] Progress: SwCharts heatmap, minutes/week vs goal, streak (computed).
+- [ ] CloudKit check: a session logged on iPhone shows up on the Mac (and back); dedupe test.
 
 **M5: Metronome + self-counted chord changes**
 - [ ] `ClickTrack` (sample-accurate, tap tempo, accents) + Metronome tool.
@@ -421,8 +436,13 @@ on iPhone and Mac.
     hammer-ons, palm mute) are parsed and shown as markers but not judged.
   - `TabScore` model → `[ExpectedEvent]` for `PlayAlongKit` (wait mode + play-along); track picker
     (which track is "you"); `TabStripView`; loop A–B + slow-down; count-in from `ClickTrack`.
-  - Playback: your track muted by default. Others are synthesised (Karplus–Strong guitar first;
-    a GM SoundFont sampler for bass/drums later, with licence noted like piano's CC0 piano).
+  - **Backing playback is in scope (user wants it).** Your track muted by default (toggle "play my
+    part"); every other track plays through `AVAudioUnitSampler` loaded with a bundled General MIDI
+    SF2 bank, GM programs per track from the GP file, drums on channel 10. Candidate banks:
+    **GeneralUser GS** (~30 MB SF2, permissive licence) or FluidR3_GM (MIT, ~140 MB, too big).
+    Confirm the licence and record it in README like piano's CC0 piano. `AVAudioUnitSampler` takes
+    SF2/DLS, not SF3. Per-track mute/solo/volume, tempo scale without pitch change, same clock as
+    the judge (piano's single-clock rule).
   - Tests: build `.gp5` byte fixtures in test code (piano's MIDI fixture pattern). The 7 real files
     are copyrighted tabs, so they're used for a manual local smoke test only, never committed.
   - Then `.gp` (GP7/8: zip + `score.gpif` XML). `.gpx` (GP6) and MIDI import only if needed.
@@ -432,8 +452,16 @@ on iPhone and Mac.
 
 ## 9. Risks
 
-- **Mic accuracy in real rooms** (fan noise, quiet unplugged electric). Mitigations: interface
-  input, sensitivity setting, tap-mode fallback in every drill.
+- **Mic accuracy with an unplugged electric** (quiet strings, fan noise). Mitigations: the
+  `unpluggedElectric` profile, keeping the device close, the USB interface, and a tap-mode fallback
+  in every drill. M2 must be tested against the user's actual guitar unplugged, not just synth
+  fixtures.
+- **Backing tracks vs the built-in mic.** Speaker backing will drown an unplugged electric even with
+  `Prior.suppressed`. With mic input + speaker, song play-along defaults to wait mode (backing pauses
+  while it listens) and suggests headphones or the USB interface. With DI input there's no bleed, so
+  everything is allowed.
+- **CloudKit sync iPhone ↔ Mac** is a must-have: verify sessions, cards and song files appear on the
+  other device in M4 (and M10 for songs), on real devices with the same iCloud account.
 - **Chord verification false negatives** frustrate fast. Ship M5 self-counted first, and only
   replace it when M6 beats the user's own count on recorded tests.
 - **Extraction coupling with piano:** PitchKit extraction waits for the piano branch to merge. If it
@@ -444,19 +472,19 @@ on iPhone and Mac.
 
 ## 10. Open questions
 
-Answered 2026-10-08: **songs come from Guitar Pro** (→ M10, `.gp5` first) and **the tuner gets a
-432 Hz option** (→ M2, applied app-wide). Plain 12-TET at A = 432, not Precise Temperament.
+Answered 2026-10-08:
+- **Songs come from Guitar Pro** → M10, `.gp5` first.
+- **The tuner gets a 432 Hz option** → M2, applied app-wide. Plain 12-TET at A = 432, not Precise
+  Temperament.
+- **Main guitar is an electric, mostly unplugged; a small USB interface is available** → built-in
+  mic is the default input, and the USB interface is fully supported with input monitoring (§3.1).
+- **macOS is a real v1 target** → every MVP milestone ships on iPhone and Mac.
+- **CloudKit sync is required** → entitlements in M0, cross-device check in M4/M10.
+- **Backing playback for Guitar Pro songs: yes** → GM SF2 sampler in M10.
 
-1. **Primary guitar for practice: acoustic or electric (through an interface or not)?** This decides
-   whether M2 optimises for mic-in-room or DI input, and whether an interface is "recommended" or
-   "assumed".
-2. **Is macOS a real target for v1, or iPhone-first with the Mac later?** The plan keeps the split
-   from day one either way, but Mac-for-MVP doubles UI work in M0–M5.
-3. Guitar Pro playback: hear the other tracks (bass/drums) as backing, or just a click + your part
-   at first? Backing needs a GM SoundFont (licence + app size).
-4. Name: keep **GuitarOS** (repo/icon) or go suite-lowercase **guitar** like piano/strike?
-5. Deployment target iOS/macOS 26 (matches piano; PitchKit's `Synchronization` needs 18+) OK?
-6. Willing to record ~20 short real clips (single notes, a few strummed chords, muted strings) as
-   test fixtures?
-7. Any guitar course videos worth turning into scrolls/flashcards (ScrollKit pattern), or drop M11
+1. Name: keep **GuitarOS** (repo/icon) or go suite-lowercase **guitar** like piano/strike?
+2. Deployment target iOS/macOS 26 (matches piano; PitchKit's `Synchronization` needs 18+) OK?
+3. Willing to record ~20 short real clips (single notes, a few strummed chords, muted strings) as
+   test fixtures? With the electric unplugged and through the USB interface, both.
+4. Any guitar course videos worth turning into scrolls/flashcards (ScrollKit pattern), or drop M11
    scrolls?
