@@ -14,6 +14,8 @@ packages:
     path: ../../Frameworks/Study/ScrollKit
   SwCharts:
     path: ../../Frameworks/Charts/ChartKit
+  MusicTheoryKit:
+    path: ../../Frameworks/Music/MusicTheoryKit
 
 settings:
   base:
@@ -34,6 +36,7 @@ targets:
       - package: DiagnosticsKit
       - package: ScrollKit
       - package: SwCharts
+      - package: MusicTheoryKit
     sources:
       - path: Sources/Shared
       - path: Sources/iOS

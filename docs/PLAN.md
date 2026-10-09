@@ -371,7 +371,7 @@ The user builds and runs. Agents run tests only when asked.
 
 ### MVP (M0–M5)
 
-**M0: Project reset** — done 2026-10-09 (PR #? `m0-project-reset`)
+**M0: Project reset** — done 2026-10-09 (PR #1 `m0-project-reset`)
 - [x] WIP stashed (user chose stash over commit): `git stash` entry `guitar-prototype-2022-wip`,
       SHA `1d2397d6078bebfb41a3da8c02577959389b9fd5`, includes `icon/prsHeadstock.svg`. Restore with
       `git stash apply 1d2397d` (never pop). Tag `prototype-2022` = e9fb801.
@@ -393,13 +393,16 @@ The user builds and runs. Agents run tests only when asked.
 - Worktree note: local packages are `../../Frameworks/...`; inside `.claude/worktrees/<x>` that resolves
   to `.claude/Frameworks`, which is a symlink to `~/Documents/apps/Frameworks` (untracked).
 
-**M1: Theory + fretboard core (pure)**
-- [ ] Extract `MusicTheoryKit` from piano; switch piano to it (separate piano PR).
-- [ ] Add `Interval`, `Scale`, `Mode` (+ tests).
-- [ ] `Tuning` (standard, drop D, DADGAD, open G/D, half-step down; custom later), `FretPosition`,
-      `Fretboard.positions(of:)`, `pitch(at:)`.
-- [ ] `FretboardLayout` (realistic compressed fret spacing, left-handed mirror) + tests;
-      `FretboardView` (Canvas) shared component.
+**M1: Theory + fretboard core (pure)** — done 2026-10-09 (PR #2 `m1-theory-fretboard`)
+- [x] `MusicTheoryKit` extracted (`Frameworks/Music/MusicTheoryKit`, github.com/sphericalwave/MusicTheoryKit,
+      private); piano switched in piano PR #7. **Note:** piano's `Chord`/`ChordAnalysis`/`RomanNumeral` were
+      uncommitted staff-strip WIP in the main checkout, not on main, so the package carries *copies* and piano
+      keeps its own until that work lands (then delete piano's and import).
+- [x] `Interval`, `Scale`, `Mode` (+ tests) in MusicTheoryKit. `PitchName` gained flat spelling.
+- [x] `Tuning` (standard, drop D, half-step down, DADGAD, open G/D; custom via "E2 A2 D3 G3 B3 E4" text),
+      `FretPosition` (key "s3f7"), `Fretboard.positions(of:)`, `pitch(at:)`, `allPositions` with scope.
+- [x] `FretboardLayout` (blended real/even fret spacing, left-handed mirror, hit testing) + tests;
+      `FretboardView` (Canvas) shared component; reference fretboard in the Practice tab for now.
 
 **M2: Listening + tuner**
 - [ ] Extract `PitchKit` (after piano merges mic branch); `InstrumentProfile.guitar`.
