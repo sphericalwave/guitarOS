@@ -269,7 +269,7 @@ guitar/
 |---|---|
 | **DiagnosticsKit** | Error log + `AudioSessionMonitor` (route changes when an interface is plugged in). Suite standard. |
 | **ScrollKit** | `SM2` + `SpacedRepetitionCard` for `SkillCard`. Later `ScrollManifest`/`Cloze` if lesson scrolls happen. |
-| **SwCharts** (was ChartKit) | Follow the house **D/W/M standard** (`period-charts` skill): `PeriodChartView` + `PeriodPicker` in the principal toolbar, per-screen `@AppStorage("<screen>ChartPeriod")`. Metrics: practice minutes (`.sum`), changes/min and BPM (`.average`). Plus `CalendarHeatmap` (streak) and `NormalDistributionChart` (timing offsets). Daily-goal bars aren't supported by `PeriodChartView`, so the goal shows as the Today ring, not a chart bar. |
+| **SwCharts** (was ChartKit) | Follow the house **D/W/M standard** (`period-charts` skill): `PeriodChartView` + `PeriodPicker` in the principal toolbar, per-screen `@AppStorage("<screen>ChartPeriod")`. Metrics: practice minutes (`.sum`), changes/min and BPM (`.average`). Plus `CalendarHeatmap` (streak) and `NormalDistributionChart` (timing offsets). The daily practice goal uses `PeriodGoal` (goal scaled per period for `.sum`, hit/miss tint), alongside the Today ring. |
 | **SwDesignSystem** | Selectively: `SwTheme`, toasts/`Popup`, `CircularProgressView` (goal ring). Several files are UIKit-only behind `canImport`; check each component on macOS before using it. |
 
 ### Extract into new shared packages (piano and guitar both depend on them)
@@ -373,6 +373,9 @@ The user builds and runs. Agents run tests only when asked.
 
 **M0: Project reset**
 - [ ] Commit/discard current WIP; tag `prototype-2022`.
+- [ ] Name is **guitar** (suite lowercase): `guitar.xcodeproj`, target/scheme `guitar`, display
+      name "guitar", `GuitarApp` entry point. Delete `GuitarOS.xcodeproj` + `GuitarOS/` sources once
+      the icon and launch assets are moved. The GitHub repo stays `guitarOS` unless you rename it.
 - [ ] XcodeGen `project.yml` (strike pattern): iOS 26 + macOS 26, Swift 6, MainActor default
       isolation, portrait-only (iOS), bundle id `com.sphericalwave.music.guitar`, **CloudKit
       container + iCloud entitlements on both iOS and macOS from day one**, remote-notification
@@ -485,6 +488,6 @@ Answered 2026-10-08:
 - **Backing playback for Guitar Pro songs: yes** → GM SF2 sampler in M10.
 - 2026-10-09: **no real test clips and no course videos for now** → synth fixtures for MVP, real
   clips gate M6; lesson scrolls parked.
+- 2026-10-09: **name is "guitar"** for now (M0).
 
-1. Name: keep **GuitarOS** (repo/icon) or go suite-lowercase **guitar** like piano/strike?
-2. Deployment target iOS/macOS 26 (matches piano; PitchKit's `Synchronization` needs 18+) OK?
+1. Deployment target iOS/macOS 26 (matches piano; PitchKit's `Synchronization` needs 18+) OK?
