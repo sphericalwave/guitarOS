@@ -63,7 +63,7 @@ that becomes the SM-2 quality grade. You practise what you're slow at, not what 
 | 6 | Tab / song play-along | mic (mono + score-informed) | **Guitar Pro** import: `.gp5` first (the user's existing files), then `.gp` (GP7/8). Wait mode + play-along. MIDI import optional, later. |
 | 7 | Theory flashcards | tap | Generated from the theory engine ("3rd of D major?", "notes of A Dorian?"). |
 | 8 | MIDI guitar input | CoreMIDI | Per-string channels (Fishman TriplePlay, Jamstik) give the string; optional. |
-| 9 | Lesson scrolls | — | strike/ScrollKit pattern for any guitar course videos → chapters → cards. Only if source material exists. |
+| parked | Lesson scrolls | — | strike/ScrollKit pattern for guitar course videos. Parked 2026-10-09: no source material yet. |
 
 Explicitly **not** planned: lessons/curriculum content, social, a backing-track library, AI chord
 transcription of arbitrary recordings, landscape.
@@ -134,7 +134,8 @@ fork it.
 ### 3.6 Test fixtures
 Mirror piano's `PianoToneSynth` with a **Karplus–Strong `GuitarToneSynth`** (single notes, strums
 with per-string delays, muted strings) so detection is unit-tested without audio files. Add ~20 short
-real recordings later for regression (open question 6).
+real recordings later for regression. None for now (2026-10-09): MVP relies on synth fixtures plus
+the user's own on-device testing. Real clips become a gate before M6 (see M6).
 
 ---
 
@@ -268,7 +269,7 @@ guitar/
 |---|---|
 | **DiagnosticsKit** | Error log + `AudioSessionMonitor` (route changes when an interface is plugged in). Suite standard. |
 | **ScrollKit** | `SM2` + `SpacedRepetitionCard` for `SkillCard`. Later `ScrollManifest`/`Cloze` if lesson scrolls happen. |
-| **SwCharts** (was ChartKit; renamed 2026-10-08, depend on `SwCharts.git` once the repo rename lands) | `CalendarHeatmap` (streak), `PeriodBarChart` (minutes), `PeriodGoalBarChart` (daily goal), `NormalDistributionChart` (timing offsets), `SlopeColoredLineChart` (changes/min trend). |
+| **SwCharts** (was ChartKit) | Follow the house **D/W/M standard** (`period-charts` skill): `PeriodChartView` + `PeriodPicker` in the principal toolbar, per-screen `@AppStorage("<screen>ChartPeriod")`. Metrics: practice minutes (`.sum`), changes/min and BPM (`.average`). Plus `CalendarHeatmap` (streak) and `NormalDistributionChart` (timing offsets). Daily-goal bars aren't supported by `PeriodChartView`, so the goal shows as the Today ring, not a chart bar. |
 | **SwDesignSystem** | Selectively: `SwTheme`, toasts/`Popup`, `CircularProgressView` (goal ring). Several files are UIKit-only behind `canImport`; check each component on macOS before using it. |
 
 ### Extract into new shared packages (piano and guitar both depend on them)
@@ -405,7 +406,7 @@ The user builds and runs. Agents run tests only when asked.
 **M4: Log, Today, Progress**
 - [ ] `PracticeSession`/`PracticeBlock`; block-level autosave + resume.
 - [ ] `RoutineBuilder` (due cards first, goal minutes); Today screen; end-of-session screen.
-- [ ] Progress: SwCharts heatmap, minutes/week vs goal, streak (computed).
+- [ ] Progress: SwCharts heatmap + D/W/M practice-minutes `PeriodChartView`, streak (computed).
 - [ ] CloudKit check: a session logged on iPhone shows up on the Mac (and back); dedupe test.
 
 **M5: Metronome + self-counted chord changes**
@@ -418,7 +419,8 @@ on iPhone and Mac.
 
 ### After MVP
 - **M6: Auto chord-change detection.** `ChordVerifier` (score-informed), strum onsets, per-string
-  feedback; synthetic strum tests + real recordings.
+  feedback; synthetic strum tests. **Gate:** needs ~20 real clips (unplugged + USB) before it
+  replaces self-counting. The user doesn't have them yet; ask again when M5 ships.
 - **M7: Scales/modes/CAGED.** Shape generator, `PlayAlongKit` extraction, wait mode + timed mode,
   speed trainer (+N BPM per clean pass), `scaleShape` cards.
 - **M8: Rhythm trainer.** Onset vs click, timing histogram, subdivision drills.
@@ -446,7 +448,7 @@ on iPhone and Mac.
   - Tests: build `.gp5` byte fixtures in test code (piano's MIDI fixture pattern). The 7 real files
     are copyrighted tabs, so they're used for a manual local smoke test only, never committed.
   - Then `.gp` (GP7/8: zip + `score.gpif` XML). `.gpx` (GP6) and MIDI import only if needed.
-- **M11: Extras.** MIDI guitar, theory flashcards, lesson scrolls.
+- **M11: Extras.** MIDI guitar, theory flashcards. (Lesson scrolls parked.)
 
 ---
 
@@ -481,10 +483,8 @@ Answered 2026-10-08:
 - **macOS is a real v1 target** → every MVP milestone ships on iPhone and Mac.
 - **CloudKit sync is required** → entitlements in M0, cross-device check in M4/M10.
 - **Backing playback for Guitar Pro songs: yes** → GM SF2 sampler in M10.
+- 2026-10-09: **no real test clips and no course videos for now** → synth fixtures for MVP, real
+  clips gate M6; lesson scrolls parked.
 
 1. Name: keep **GuitarOS** (repo/icon) or go suite-lowercase **guitar** like piano/strike?
 2. Deployment target iOS/macOS 26 (matches piano; PitchKit's `Synchronization` needs 18+) OK?
-3. Willing to record ~20 short real clips (single notes, a few strummed chords, muted strings) as
-   test fixtures? With the electric unplugged and through the USB interface, both.
-4. Any guitar course videos worth turning into scrolls/flashcards (ScrollKit pattern), or drop M11
-   scrolls?
