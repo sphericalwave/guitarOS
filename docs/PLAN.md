@@ -371,18 +371,27 @@ The user builds and runs. Agents run tests only when asked.
 
 ### MVP (M0–M5)
 
-**M0: Project reset**
-- [ ] Commit/discard current WIP; tag `prototype-2022`.
-- [ ] Name is **guitar** (suite lowercase): `guitar.xcodeproj`, target/scheme `guitar`, display
-      name "guitar", `GuitarApp` entry point. Delete `GuitarOS.xcodeproj` + `GuitarOS/` sources once
-      the icon and launch assets are moved. The GitHub repo stays `guitarOS` unless you rename it.
-- [ ] XcodeGen `project.yml` (strike pattern): iOS 26 + macOS 26, Swift 6, MainActor default
-      isolation, portrait-only (iOS), bundle id `com.sphericalwave.music.guitar`, **CloudKit
-      container + iCloud entitlements on both iOS and macOS from day one**, remote-notification
-      background mode (CloudKit push), mic usage strings, macOS audio-input sandbox entitlement.
-- [ ] Carry over AppIcon + launch logo; regenerate via the icon skill if needed.
-- [ ] `Shared/iOS/macOS` skeleton, RootView per platform, `@AppStorage` tab, DiagnosticsKit wired.
-- [ ] Swift Testing smoke test.
+**M0: Project reset** — done 2026-10-09 (PR #? `m0-project-reset`)
+- [x] WIP stashed (user chose stash over commit): `git stash` entry `guitar-prototype-2022-wip`,
+      SHA `1d2397d6078bebfb41a3da8c02577959389b9fd5`, includes `icon/prsHeadstock.svg`. Restore with
+      `git stash apply 1d2397d` (never pop). Tag `prototype-2022` = e9fb801.
+- [x] Name is **guitar** (suite lowercase): `guitar.xcodeproj`, target/scheme `guitar`, display
+      name "guitar", `GuitarApp` entry point. `GuitarOS.xcodeproj` + `GuitarOS/` deleted; the icon and
+      launch assets moved to `Resources/Assets.xcassets`. The GitHub repo stays `guitarOS`.
+- [x] XcodeGen `project.yml` (strike pattern): iOS 26 + macOS 26, Swift 6, MainActor default
+      isolation, portrait-only (iOS), bundle id `com.sphericalwave.music.guitar`, CloudKit
+      container + iCloud entitlements on both iOS and macOS, remote-notification + audio background
+      modes, mic usage string, macOS sandbox + audio-input entitlement (two entitlements files, per SDK).
+- [x] AppIcon carried over (1024 iOS + mac ladder via `sips`), LaunchLogo from `assets/prs.png`,
+      white `LaunchBackground`, `UILaunchScreen` dict (no storyboard).
+- [x] `Shared/iOS/macOS` skeleton, `AppSection`, RootView per platform (`@AppStorage("guitarSelectedTab")`
+      / `guitarSidebarPane`), DiagnosticsKit `DiagnosticsView` under Tools.
+- [x] Swift Testing smoke test (`AppSectionTests`).
+- Gate used: `xcodebuild -scheme guitar -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO test` and a
+  `generic/platform=iOS` compile. No simulator or device. Signing + the iCloud container get provisioned
+  the first time the user builds in Xcode.
+- Worktree note: local packages are `../../Frameworks/...`; inside `.claude/worktrees/<x>` that resolves
+  to `.claude/Frameworks`, which is a symlink to `~/Documents/apps/Frameworks` (untracked).
 
 **M1: Theory + fretboard core (pure)**
 - [ ] Extract `MusicTheoryKit` from piano; switch piano to it (separate piano PR).
