@@ -1,0 +1,104 @@
+name: guitar
+options:
+  bundleIdPrefix: com.sphericalwave.music
+  deploymentTarget:
+    iOS: "26.0"
+    macOS: "26.0"
+  createIntermediateGroups: true
+
+packages:
+  DiagnosticsKit:
+    url: https://github.com/sphericalwave/DiagnosticsKit.git
+    branch: main
+  ScrollKit:
+    path: ../../Frameworks/Study/ScrollKit
+  SwCharts:
+    path: ../../Frameworks/Charts/ChartKit
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+    SWIFT_APPROACHABLE_CONCURRENCY: YES
+    DEVELOPMENT_TEAM: TPR24Z5M9G
+    CODE_SIGN_STYLE: Automatic
+    GENERATE_INFOPLIST_FILE: NO
+    CURRENT_PROJECT_VERSION: 1
+    MARKETING_VERSION: "0.1"
+
+targets:
+  guitar:
+    type: application
+    supportedDestinations: [iOS, macOS]
+    dependencies:
+      - package: DiagnosticsKit
+      - package: ScrollKit
+      - package: SwCharts
+    sources:
+      - path: Sources/Shared
+      - path: Sources/iOS
+        destinationFilters: [iOS]
+      - path: Sources/macOS
+        destinationFilters: [macOS]
+      - path: Resources
+    info:
+      path: guitar/Info.plist
+      properties:
+        CFBundleDisplayName: guitar
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSRequiresIPhoneOS: true
+        NSMicrophoneUsageDescription: guitar listens to your guitar to tune it and to grade what you play.
+        # Splash: LaunchBackground fill + centred LaunchLogo (the PRS headstock), no storyboard.
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+          UIImageName: LaunchLogo
+          UIImageRespectsSafeAreaInsets: true
+        UIBackgroundModes:
+          - remote-notification
+          - audio
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+        UIRequiresFullScreen: true
+        LSApplicationCategoryType: public.app-category.music
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.sphericalwave.music.guitar
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ENABLE_PREVIEWS: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        # iOS and macOS entitlements differ (sandbox + audio input on the Mac), so two files.
+        CODE_SIGN_ENTITLEMENTS: guitar/guitar.entitlements
+        CODE_SIGN_ENTITLEMENTS[sdk=macosx*]: guitar/guitar-macOS.entitlements
+
+  guitarTests:
+    type: bundle.unit-test
+    supportedDestinations: [iOS, macOS]
+    sources:
+      - path: Tests/guitarTests
+    dependencies:
+      - target: guitar
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.sphericalwave.music.guitarTests
+        # XcodeGen writes the iOS host path for both destinations; the Mac bundle nests it.
+        TEST_HOST[sdk=macosx*]: $(BUILT_PRODUCTS_DIR)/guitar.app/Contents/MacOS/guitar
+
+schemes:
+  guitar:
+    build:
+      targets:
+        guitar: all
+        guitarTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - guitarTests
+    archive:
+      config: Release

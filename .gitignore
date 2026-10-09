@@ -26,3 +26,8 @@ build/
 *~
 *.dat
 *.dep
+
+# Xcode
+DerivedData/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+.build/
