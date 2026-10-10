@@ -10,4 +10,14 @@ nonisolated enum SettingsKey {
     static let tuning = "tuning"
     static let preferSharps = "preferSharps"
     static let fretCount = "fretCount"
+    /// Reference A in Hz: 440 (default), 432, or a custom 415...466.
+    static let referenceA = "referenceA"
+    /// Last custom A the user typed, shown as the field's placeholder.
+    static let lastCustomA = "lastCustomA"
+    /// `InputProfile` raw value.
+    static let inputProfile = "inputProfile"
+    static let sensitivity = "sensitivity"
+    static let inputMonitoring = "inputMonitoring"
+    /// `TunerViewModel.Reference` raw value: which reference control was last chosen.
+    static let referenceChoice = "referenceChoice"
 }

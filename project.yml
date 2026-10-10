@@ -6,16 +6,23 @@ options:
     macOS: "26.0"
   createIntermediateGroups: true
 
+# All packages are remote (github.com/sphericalwave, branch main); never ../../Frameworks paths.
 packages:
   DiagnosticsKit:
     url: https://github.com/sphericalwave/DiagnosticsKit.git
     branch: main
   ScrollKit:
-    path: ../../Frameworks/Study/ScrollKit
+    url: https://github.com/sphericalwave/ScrollKit.git
+    branch: main
   SwCharts:
-    path: ../../Frameworks/Charts/ChartKit
+    url: https://github.com/sphericalwave/ChartKit.git
+    branch: main
   MusicTheoryKit:
-    path: ../../Frameworks/Music/MusicTheoryKit
+    url: https://github.com/sphericalwave/MusicTheoryKit.git
+    branch: main
+  PitchKit:
+    url: https://github.com/sphericalwave/PitchKit.git
+    branch: main
 
 settings:
   base:
@@ -37,6 +44,7 @@ targets:
       - package: ScrollKit
       - package: SwCharts
       - package: MusicTheoryKit
+      - package: PitchKit
     sources:
       - path: Sources/Shared
       - path: Sources/iOS
