@@ -11,6 +11,13 @@ struct ToolsView: View {
                     Label("Tuner", systemImage: "tuningfork")
                 }
             }
+            Section("Settings") {
+                NavigationLink {
+                    SettingsView()
+                } label: {
+                    Label("Settings", systemImage: "gearshape")
+                }
+            }
             Section("Support") {
                 NavigationLink {
                     DiagnosticsView()
