@@ -13,7 +13,7 @@ struct RootView: View {
     var body: some View {
         TabView(selection: selection) {
             ForEach(AppSection.allCases) { section in
-                NavigationStack { screen(for: section) }
+                NavigationStack { screen(for: section).toolbar { TunerToolbarButton() } }
                     .tabItem { Label(section.title, systemImage: section.icon) }
                     .tag(section)
             }

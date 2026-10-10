@@ -10,7 +10,7 @@ Layout: `Sources/Shared` (models, engine, view models, shared components), `Sour
 `Sources/macOS` (navigation + platform screens, filtered per destination), `Tests/guitarTests`
 (Swift Testing).
 
-Packages: DiagnosticsKit (remote), ScrollKit and SwCharts (local, `../../Frameworks`).
+Packages (all remote, github.com/sphericalwave, branch main): DiagnosticsKit, ScrollKit, SwCharts (repo `ChartKit`), MusicTheoryKit, PitchKit. Push a package change before building guitar against it.
 
 The 2022 prototype is tagged `prototype-2022`; its uncommitted WIP is the stash
 `guitar-prototype-2022-wip` (see `docs/PLAN.md` M0).

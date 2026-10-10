@@ -404,14 +404,29 @@ The user builds and runs. Agents run tests only when asked.
 - [x] `FretboardLayout` (blended real/even fret spacing, left-handed mirror, hit testing) + tests;
       `FretboardView` (Canvas) shared component; reference fretboard in the Practice tab for now.
 
-**M2: Listening + tuner**
-- [ ] Extract `PitchKit` (after piano merges mic branch); `InstrumentProfile.guitar`.
-- [ ] `AudioHub` (one engine), input picker (built-in mic / USB interface, auto-switch on plug-in),
-      level meter, permission flow, input monitoring for DI.
-- [ ] `unpluggedElectric` + `di` input profiles; tune gate/sensitivity on the real guitar.
-- [ ] `GuitarToneSynth` test fixtures; YIN accuracy tests E2–E6 ±3 cents.
-- [ ] Tuner screen (both platforms) with reference pitch 440 / 432 / custom, applied app-wide;
-      tests: synthetic A432-tuned strings read as in tune at 432 and −31.8 cents at 440.
+**M2: Listening + tuner** — done 2026-10-09 (PR #3 `m2-listening-tuner`)
+- [x] `PitchKit` extracted from piano@efbc1d8 (`Frameworks/Audio/PitchKit`, github.com/sphericalwave/PitchKit,
+      private): `InstrumentProfile` (`.piano()`, `.guitar(a4:gateDecibels:)`), `NoteDetector` (was
+      `PianoNoteDetector`, emits `NoteEvent`, exposes `latestPitch` every hop), `MicrophoneCapture` (+ optional
+      input monitoring), `AudioRecordingSession`. 15 package tests. **piano is NOT switched yet**: its
+      microphone code is being changed on `perf/mic-latency`; switch piano after that lands (re-port the diff).
+- [x] **All guitar packages are remote** (github.com/sphericalwave/*.git, branch main) per the user, 2026-10-09.
+      SwCharts lives in the `ChartKit` repo. Push a package before building guitar against a change.
+- [x] `AudioHub` (one engine, acquire/release, permission flow, level, pitch, note events, rebuilds on
+      settings change or route change), `AudioInputSelecting` adapter (iOS: session inputs + speaker check;
+      macOS: system input only, no monitoring), level meter.
+- [x] `InputProfile` `.unpluggedElectric` (gate −75 dBFS, sensitivity 0.7) / `.di` (−60, 0.5); untested on
+      the real guitar — **the user must try the tuner unplugged and tune the gate/sensitivity**.
+- [x] `GuitarToneSynth` (Karplus–Strong) test fixture; YIN reads E2–E6 plucks within 3 cents; A432 string
+      reads −31.8 cents at 440 and in tune at 432 (PitchKit + guitar tests).
+- [x] Tuner on both platforms (iOS sheet from the toolbar tuning fork on every tab + Tools; macOS utility
+      window ⌘T + Tools): note, cents, needle, string dots, 440 | 432 | Custom (last-value placeholder,
+      415–466), tuning picker, input picker, monitoring toggle (only off-speaker), "Can't hear the guitar"
+      after 3 s, permission/Settings link, retry. Reference A applies app-wide via `AudioHub.referenceA`.
+- [x] `CloudSettings` mirrors tuning + reference A through `NSUbiquitousKeyValueStore`.
+- Known: on the Karplus–Strong attack the polyphonic path can emit an overtone note-on before the real
+  note (noise burst looks like harmonics). Drills grade on the YIN pitch (`AudioHub.pitch`) until the chord
+  verifier (M6) tunes the template path for guitar. "Retune now?" prompt on A change not built yet.
 
 **M3: Fretboard note trainer**
 - [ ] `SkillCard` + `CardStore` (lazy create, dedupe pass) + `AutoGrade`.

@@ -17,7 +17,7 @@ struct RootView: View {
             }
             .navigationSplitViewColumnWidth(min: 160, ideal: 190)
         } detail: {
-            NavigationStack { screen(for: AppSection(rawValue: paneRaw) ?? .today) }
+            NavigationStack { screen(for: AppSection(rawValue: paneRaw) ?? .today).toolbar { TunerToolbarButton() } }
         }
     }
 
