@@ -15,7 +15,7 @@ packages:
     url: https://github.com/sphericalwave/ScrollKit.git
     branch: main
   SwCharts:
-    url: https://github.com/sphericalwave/ChartKit.git
+    url: https://github.com/sphericalwave/SwCharts.git
     branch: main
   MusicTheoryKit:
     url: https://github.com/sphericalwave/MusicTheoryKit.git

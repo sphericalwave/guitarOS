@@ -38,8 +38,8 @@ final class AudioHub {
     var sensitivity: Double { didSet { capture?.setSensitivity(sensitivity) } }
     var monitorInput: Bool { didSet { if monitorInput != oldValue { rebuildIfListening() } } }
 
-    /// Every note on and off heard.
-    @ObservationIgnored var onEvent: ((NoteEvent) -> Void)?
+    /// Every note on and off heard, with when it happened in host-clock seconds (strike time for note-ons).
+    @ObservationIgnored var onEvent: ((NoteEvent, TimeInterval) -> Void)?
     /// Asked as audio comes in for what the drill expects and what the app itself is playing.
     @ObservationIgnored var priorProvider: (() -> PolyphonicNoteEstimator.Prior)?
 
@@ -156,7 +156,8 @@ final class AudioHub {
         configurationObserver = nil
         capture?.stop()
         capture = nil
-        for pitch in heardPitches.sorted() { onEvent?(.noteOff(pitch: pitch)) }
+        let now = AVAudioTime.seconds(forHostTime: mach_absolute_time())
+        for pitch in heardPitches.sorted() { onEvent?(.noteOff(pitch: pitch), now) }
         heardPitches = []
     }
 
@@ -200,7 +201,7 @@ final class AudioHub {
     }
 
     private func apply(_ update: MicrophoneCapture.Update) {
-        for event in update.events { onEvent?(event) }
+        for heard in update.events { onEvent?(heard.event, heard.time) }
         if heardPitches != update.sounding { heardPitches = update.sounding }
         if pitch != update.pitch { pitch = update.pitch }
         levelDecibels = update.level

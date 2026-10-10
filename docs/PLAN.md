@@ -408,10 +408,10 @@ The user builds and runs. Agents run tests only when asked.
 - [x] `PitchKit` extracted from piano@efbc1d8 (`Frameworks/Audio/PitchKit`, github.com/sphericalwave/PitchKit,
       private): `InstrumentProfile` (`.piano()`, `.guitar(a4:gateDecibels:)`), `NoteDetector` (was
       `PianoNoteDetector`, emits `NoteEvent`, exposes `latestPitch` every hop), `MicrophoneCapture` (+ optional
-      input monitoring), `AudioRecordingSession`. 15 package tests. **piano is NOT switched yet**: its
-      microphone code is being changed on `perf/mic-latency`; switch piano after that lands (re-port the diff).
+      input monitoring), `AudioRecordingSession`. piano #6 (finer hop, vDSP, expected-note confirm, strike
+      timestamps) ported in PitchKit PR #1 (2026-10-09). **piano is NOT switched yet**; do it as a separate piano PR.
 - [x] **All guitar packages are remote** (github.com/sphericalwave/*.git, branch main) per the user, 2026-10-09.
-      SwCharts lives in the `ChartKit` repo. Push a package before building guitar against a change.
+      SwCharts is `SwCharts.git` (repo renamed from ChartKit). Push a package before building guitar against a change.
 - [x] `AudioHub` (one engine, acquire/release, permission flow, level, pitch, note events, rebuilds on
       settings change or route change), `AudioInputSelecting` adapter (iOS: session inputs + speaker check;
       macOS: system input only, no monitoring), level meter.
@@ -428,10 +428,20 @@ The user builds and runs. Agents run tests only when asked.
   note (noise burst looks like harmonics). Drills grade on the YIN pitch (`AudioHub.pitch`) until the chord
   verifier (M6) tunes the template path for guitar. "Retune now?" prompt on A change not built yet.
 
-**M3: Fretboard note trainer**
-- [ ] `SkillCard` + `CardStore` (lazy create, dedupe pass) + `AutoGrade`.
-- [ ] Find-the-note (mic) and name-the-note (tap) drills; due-queue + customize scope.
-- [ ] Per-position mastery heatmap on the fretboard.
+**M3: Fretboard note trainer** — done 2026-10-09 (PR #4 `m3-fretboard-trainer`)
+- [x] `SkillCard` (SwiftData, CloudKit-safe, no relationships) + `ModelContainer` in `GuitarApp` (CloudKit
+      automatic, local fallback, **never wipes the store**); `CardStore` (lazy create, `dedupe()` at launch via
+      `CardMerge`, `record` → SM-2 via ScrollKit); `AutoGrade` (wrong 1; right <2 s 5, <5 s 4, else 3; per-kind
+      thresholds). Data survival: new model, nothing to migrate.
+- [x] Drills: **Play it** (mic: "F♯ / G string", judged on the YIN pitch held for 3 readings, exact pitch, string
+      trusted, reference A honoured) and **Name it** (tap, 4×3 note grid, pitch class). Due cards first, then
+      unseen positions; mode remembered; scope (naturals, frets, strings) behind Customize; wrong answers show
+      the heard note on the asked string; auto-advance. Mic denied → Settings link + switch to Name it.
+- [x] Mastery heatmap on the Practice home fretboard (`MasteryMap`: accuracy × schedule; orange = due).
+- [x] Fix: `com.apple.developer.ubiquity-kvstore-identifier` entitlement (KVS logged "BUG IN CLIENT" without it).
+- [x] PitchKit: piano #6 ported (PitchKit PR #1); `AudioHub.onEvent` now carries strike times.
+- Not yet: first-run "Which hand frets?" question (left-handed is a toggle in the Practice reference view's menu
+  → move to Settings in M4); the plan's per-kind SM-2 thresholds still need tuning on the real guitar.
 
 **M4: Log, Today, Progress**
 - [ ] `PracticeSession`/`PracticeBlock`; block-level autosave + resume.

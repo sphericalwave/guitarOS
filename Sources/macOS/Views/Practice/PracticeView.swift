@@ -1,41 +1,52 @@
 import SwiftUI
+import SwiftData
 
-/// Reference fretboard (M1). The note trainer replaces this screen's body in M3.
+/// Fretboard note trainer: home (start, heatmap, scope) and the drill itself.
 struct PracticeView: View {
+    @Environment(AudioHub.self) private var audio
+    @Environment(\.modelContext) private var context
     @AppStorage(SettingsKey.leftHanded) private var leftHanded = false
     @AppStorage(SettingsKey.preferSharps) private var preferSharps = true
     @AppStorage(SettingsKey.tuning) private var tuningText = Tuning.standard.description
-    @State private var naturalsOnly = true
-    @State private var showNames = true
+    @AppStorage(SettingsKey.drillMode) private var modeRaw = FretboardDrill.Mode.findTheNote.rawValue
+    @AppStorage(SettingsKey.drillScope) private var scopeData = Data()
+    @State private var drill: FretboardDrillViewModel?
 
     private var fretboard: Fretboard { Fretboard(tuning: Tuning.named(description: tuningText) ?? .standard) }
+    private var mode: Binding<FretboardDrill.Mode> {
+        Binding(get: { FretboardDrill.Mode(rawValue: modeRaw) ?? .findTheNote }, set: { modeRaw = $0.rawValue })
+    }
+    private var scope: Binding<FretboardDrill.Scope> {
+        Binding(
+            get: { (try? JSONDecoder().decode(FretboardDrill.Scope.self, from: scopeData)) ?? .default },
+            set: { scopeData = (try? JSONEncoder().encode($0)) ?? Data() }
+        )
+    }
 
     var body: some View {
-        VStack(spacing: 12) {
-            FretboardView(
-                fretboard: fretboard,
-                fretRange: 0...12,
-                leftHanded: leftHanded,
-                dots: showNames ? FretboardView.noteNameDots(on: fretboard, frets: 0...12, preferSharps: preferSharps, naturalsOnly: naturalsOnly) : [:]
-            )
-            .frame(maxWidth: 360)
-        }
-        .padding()
-        .navigationTitle("Practice")
-        .toolbar {
-            ToolbarItem {
-                Menu {
-                    Toggle("Note names", isOn: $showNames)
-                    Toggle("Naturals only", isOn: $naturalsOnly)
-                    Toggle("Sharps", isOn: $preferSharps)
-                    Toggle("Left-handed", isOn: $leftHanded)
-                    Picker("Tuning", selection: $tuningText) {
-                        ForEach(Tuning.presets, id: \.description) { Text($0.name).tag($0.description) }
+        Group {
+            if let drill {
+                DrillPanel(model: drill, leftHanded: leftHanded, preferSharps: preferSharps, scope: scope.wrappedValue) { end() }
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) { Button("End") { end() } }
                     }
-                } label: {
-                    Label("Options", systemImage: "slider.horizontal.3")
-                }
+            } else {
+                TrainerHomePanel(mode: mode, scope: scope, fretboard: fretboard, leftHanded: leftHanded) { begin() }
             }
         }
+        .frame(maxWidth: 480)
+        .navigationTitle("Practice")
+        .onDisappear { end() }
+    }
+
+    private func begin() {
+        let model = FretboardDrillViewModel(fretboard: fretboard, mode: mode.wrappedValue, audio: audio, cards: CardStore(context: context))
+        model.start(scope: scope.wrappedValue)
+        drill = model
+    }
+
+    private func end() {
+        drill?.stop()
+        drill = nil
     }
 }
