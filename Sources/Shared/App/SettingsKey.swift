@@ -20,4 +20,8 @@ nonisolated enum SettingsKey {
     static let inputMonitoring = "inputMonitoring"
     /// `TunerViewModel.Reference` raw value: which reference control was last chosen.
     static let referenceChoice = "referenceChoice"
+    /// `FretboardDrill.Mode` raw value; the trainer remembers the last mode.
+    static let drillMode = "drillMode"
+    /// JSON `FretboardDrill.Scope`.
+    static let drillScope = "drillScope"
 }
