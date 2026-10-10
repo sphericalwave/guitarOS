@@ -11,6 +11,7 @@ struct PracticeView: View {
     @AppStorage(SettingsKey.drillMode) private var modeRaw = FretboardDrill.Mode.findTheNote.rawValue
     @AppStorage(SettingsKey.drillScope) private var scopeData = Data()
     @State private var drill: FretboardDrillViewModel?
+    @AppStorage(SettingsKey.practicePage) private var page = "notes"
 
     private var fretboard: Fretboard { Fretboard(tuning: Tuning.named(description: tuningText) ?? .standard) }
     private var mode: Binding<FretboardDrill.Mode> {
@@ -30,8 +31,18 @@ struct PracticeView: View {
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) { Button("End") { end() } }
                     }
+            } else if page == "chords" {
+                ChordChangeView()
             } else {
                 TrainerHomePanel(mode: mode, scope: scope, fretboard: fretboard, leftHanded: leftHanded) { begin() }
+            }
+        }
+        .toolbar {
+            if drill == nil {
+                ToolbarItem(placement: .principal) {
+                    Picker("Practice", selection: $page) { Text("Notes").tag("notes"); Text("Chords").tag("chords") }
+                        .pickerStyle(.segmented).frame(width: 200)
+                }
             }
         }
         .frame(maxWidth: 480)

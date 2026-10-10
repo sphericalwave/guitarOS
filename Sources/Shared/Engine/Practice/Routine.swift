@@ -51,6 +51,8 @@ nonisolated enum RoutineBuilder {
         var learnedFretCards: Int
         /// Minutes already practised today, so a resumed day only plans the remainder.
         var minutesDoneToday: Int = 0
+        /// Best changes/min per pair key ("change:C>G"); the weakest pair is drilled.
+        var chordBests: [String: Double] = [:]
     }
 
     /// Seconds a fretboard card takes on average, for sizing the block.
@@ -68,6 +70,11 @@ nonisolated enum RoutineBuilder {
             items.append(RoutineItem(kind: .fretboard, title: inputs.dueFretCards > 0 ? "\(inputs.dueFretCards) due notes" : "Learn the neck",
                                      minutes: minutes, detail: FretboardDrill.Mode.findTheNote.rawValue))
             left -= minutes
+        }
+        if left >= 2 {
+            let pair = ChordChangeDrill.weakestPair(bests: inputs.chordBests) ?? ChordLibrary.defaultPair
+            items.append(RoutineItem(kind: .chordChange, title: "\(pair.0) → \(pair.1)", minutes: 2, detail: "\(pair.0)>\(pair.1)"))
+            left -= 2
         }
         if left > 0 {
             items.append(RoutineItem(kind: .free, title: "Free practice", minutes: left))

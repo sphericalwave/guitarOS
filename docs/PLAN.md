@@ -460,13 +460,23 @@ The user builds and runs. Agents run tests only when asked.
       Dedupe is unit-tested (`CardStoreTests.dedupeMergesSameKeyCards`).
 - Not yet: swapping a routine row (only skip), chord-change block (M5), "Which hand frets?" first run.
 
-**M5: Metronome + self-counted chord changes**
-- [ ] `ClickTrack` (sample-accurate, tap tempo, accents) + Metronome tool.
-- [ ] `ChordLibrary` (~40 bundled voicings) + `ChordGridView`.
-- [ ] One-minute changes with tap counter; `chordChange` cards with `best`; trend chart.
+**M5: Metronome + self-counted chord changes** — done 2026-10-09 (PR #6 `m5-metronome-chords`)
+- [x] `ClickSchedule` (pure, tested: buffer boundaries, fractional tempos, tap tempo) + `ClickTrack`
+      (`AVAudioSourceNode`, sample-accurate, accents, beat stream, re-anchors on tempo change). **Deviation:**
+      the click runs on its own output-only engine, not the mic engine; unify (and feed the click into
+      `Prior.suppressed`) when M6/M8 need the shared clock. Metronome tool under Tools: BPM field with the
+      last-value placeholder, ± 5, tap tempo, start/stop, beats-per-bar behind "Accent".
+- [x] `ChordLibrary`: 43 bundled voicings (open, sevenths, colour, E/A-shape barres, power) with fingers and
+      barres; test spells 20 of them through MusicTheoryKit's `ChordAnalysis`. `ChordGridView` (Canvas, X/O,
+      barre, base fret, left-handed, per-string highlight hook for M6).
+- [x] One-minute changes (Practice tab → Chords page): two grids, pair picker, optional click, giant tap
+      counter, result vs best ("New best"), `chordChange` cards with `best` (SM-2 quality vs best), trend
+      `PeriodChartView` (`.average`, `.line`, `@AppStorage("chordChartPeriod")`). Standalone runs log a
+      one-block session; the routine now includes a 2-min block on the weakest pair (C → G until one exists).
 
 **MVP done:** a daily routine of tuner check → fretboard cards → chord change, logged with a streak,
-on iPhone and Mac.
+on iPhone and Mac. **Shipped 2026-10-09 (PRs #1–#6).** Open user items: tune `InputProfile` on the real guitar,
+CloudKit cross-device check, first Xcode build provisions signing, switch piano to PitchKit (separate PR).
 
 ### After MVP
 - **M6: Auto chord-change detection.** `ChordVerifier` (score-informed), strum onsets, per-string
