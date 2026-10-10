@@ -23,7 +23,9 @@ struct RootView: View {
     @ViewBuilder
     private func screen(for section: AppSection) -> some View {
         switch section {
+        case .today: TodayView()
         case .practice: PracticeView()
+        case .progress: ProgressScreen()
         case .tools: ToolsView()
         default: PlaceholderScreen(section: section)
         }

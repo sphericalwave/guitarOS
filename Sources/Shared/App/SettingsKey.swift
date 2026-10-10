@@ -24,4 +24,7 @@ nonisolated enum SettingsKey {
     static let drillMode = "drillMode"
     /// JSON `FretboardDrill.Scope`.
     static let drillScope = "drillScope"
+    static let dailyGoalMinutes = "dailyGoalMinutes"
+    /// `ChartPeriod` for the Progress screen (house D/W/M standard).
+    static let progressChartPeriod = "progressChartPeriod"
 }

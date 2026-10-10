@@ -443,11 +443,22 @@ The user builds and runs. Agents run tests only when asked.
 - Not yet: first-run "Which hand frets?" question (left-handed is a toggle in the Practice reference view's menu
   → move to Settings in M4); the plan's per-kind SM-2 thresholds still need tuning on the real guitar.
 
-**M4: Log, Today, Progress**
-- [ ] `PracticeSession`/`PracticeBlock`; block-level autosave + resume.
-- [ ] `RoutineBuilder` (due cards first, goal minutes); Today screen; end-of-session screen.
-- [ ] Progress: SwCharts heatmap + D/W/M practice-minutes `PeriodChartView`, streak (computed).
-- [ ] CloudKit check: a session logged on iPhone shows up on the Mac (and back); dedupe test.
+**M4: Log, Today, Progress** — done 2026-10-09 (PR #5 `m4-log-today-progress`)
+- [x] `PracticeSession` (+ `endedAt`, nil = resumable) / `PracticeBlock` (cascade, inverse); schema now
+      [SkillCard, PracticeSession, PracticeBlock]. Data survival: new entities added, SkillCard unchanged →
+      lightweight migration; existing cards survive.
+- [x] `SessionRunnerViewModel`: session inserted + saved at start, every block saved as it finishes, resume
+      skips kinds already done today, end-early keeps what was logged. `RoutineBuilder` (tune up → due notes or
+      "Learn the neck" → free practice to fill the goal; resumed day plans the remainder). Today: goal ring,
+      streak, Start/Resume, routine rows with "Skip today" context menu; end screen with minutes, notes right,
+      streak, "Tomorrow: N notes due".
+- [x] Progress: SwCharts `CalendarHeatmap` (20 weeks, intensity = minutes/goal) + `PeriodChartView` practice
+      minutes (`.sum`, `.bar`, `PeriodGoal(dailyGoal)`), `PeriodPicker` in the principal toolbar,
+      `@AppStorage("progressChartPeriod")`; streak/minutes/notes-known stats. Streak and totals are computed.
+- [x] Settings (Tools → Settings): daily goal, tuning, left-handed, sharps.
+- [ ] **CloudKit check (user):** log a session on iPhone, confirm it appears on the Mac and back; cards too.
+      Dedupe is unit-tested (`CardStoreTests.dedupeMergesSameKeyCards`).
+- Not yet: swapping a routine row (only skip), chord-change block (M5), "Which hand frets?" first run.
 
 **M5: Metronome + self-counted chord changes**
 - [ ] `ClickTrack` (sample-accurate, tap tempo, accents) + Metronome tool.
