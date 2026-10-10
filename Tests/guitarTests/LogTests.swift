@@ -7,7 +7,7 @@ struct RoutineBuilderTests {
     @Test func startsWithTuningAndFillsToTheGoal() {
         let routine = RoutineBuilder.routine(.init(goalMinutes: 20, dueFretCards: 15, learnedFretCards: 30))
         #expect(routine.first?.kind == .tuner)
-        #expect(routine.map(\.kind) == [.tuner, .fretboard, .free])
+        #expect(routine.map(\.kind) == [.tuner, .fretboard, .chordChange, .free])
         #expect(RoutineBuilder.totalMinutes(routine) == 20)
         #expect(routine[1].title == "15 due notes")
         #expect(routine[1].minutes == 3)  // 15 × 12 s = 3 min
@@ -20,7 +20,7 @@ struct RoutineBuilderTests {
 
     @Test func nothingDueAndNeckKnownMeansNoFretboardBlock() {
         let routine = RoutineBuilder.routine(.init(goalMinutes: 10, dueFretCards: 0, learnedFretCards: 40))
-        #expect(routine.map(\.kind) == [.tuner, .free])
+        #expect(routine.map(\.kind) == [.tuner, .chordChange, .free])
     }
 
     @Test func resumedDayPlansOnlyTheRemainder() {
@@ -88,10 +88,11 @@ struct SessionRunnerTests {
         #expect(!runner.session.isComplete)
 
         runner.completeBlock(attempts: 5, correct: 4)
+        runner.completeBlock(attempts: 20, correct: 20, score: 20)
         runner.completeBlock()
         #expect(runner.isFinished)
         #expect(runner.session.isComplete)
-        #expect(runner.session.blocks?.count == 3)
+        #expect(runner.session.blocks?.count == 4)
         #expect(runner.summary?.cardsRight == 4 && runner.summary?.cardsTotal == 5)
         #expect(runner.summary?.minutes == 0)  // instant test blocks: under the one-minute streak threshold
         runner.stopTicking()

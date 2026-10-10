@@ -10,6 +10,11 @@ struct ToolsView: View {
                 } label: {
                     Label("Tuner", systemImage: "tuningfork")
                 }
+                NavigationLink {
+                    MetronomeView()
+                } label: {
+                    Label("Metronome", systemImage: "metronome")
+                }
             }
             Section("Settings") {
                 NavigationLink {

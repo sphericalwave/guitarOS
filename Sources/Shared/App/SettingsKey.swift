@@ -27,4 +27,11 @@ nonisolated enum SettingsKey {
     static let dailyGoalMinutes = "dailyGoalMinutes"
     /// `ChartPeriod` for the Progress screen (house D/W/M standard).
     static let progressChartPeriod = "progressChartPeriod"
+    /// `ChartPeriod` for the chord-change trend chart.
+    static let chordChartPeriod = "chordChartPeriod"
+    static let lastBPM = "lastBPM"
+    /// "C>G": the chord pair last drilled.
+    static let chordPair = "chordPair"
+    /// Practice tab page: "notes" or "chords".
+    static let practicePage = "practicePage"
 }

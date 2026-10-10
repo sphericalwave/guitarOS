@@ -13,6 +13,8 @@ struct SessionPanel: View {
 
     @State private var tuner: TunerViewModel?
     @State private var drill: FretboardDrillViewModel?
+    @State private var change: ChordChangeViewModel?
+    @State private var metronome: MetronomeViewModel?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -23,7 +25,7 @@ struct SessionPanel: View {
                 block(item)
             }
         }
-        .onChange(of: runner.index) { tuner = nil; drill = nil }
+        .onChange(of: runner.index) { tuner = nil; drill = nil; change = nil; metronome?.stop(); metronome = nil }
     }
 
     private func header(_ item: RoutineItem) -> some View {
@@ -64,6 +66,25 @@ struct SessionPanel: View {
                     )
                     model.start(scope: scope, count: max(6, Int(Double(item.minutes) * 60 / RoutineBuilder.secondsPerCard)))
                     drill = model
+                }
+            }
+        case .chordChange:
+            if let change, let metronome {
+                ChordChangePanel(model: change, leftHanded: leftHanded, metronome: metronome)
+                    .onChange(of: change.phase) {
+                        if case .done(let result, _) = change.phase {
+                            runner.completeBlock(attempts: result.changes, correct: result.changes, score: result.changesPerMinute)
+                        }
+                    }
+            } else {
+                ProgressView().task {
+                    let names = (item.detail ?? "").split(separator: ">").map(String.init)
+                    let first = names.first.flatMap(ChordLibrary.voicing(named:)) ?? ChordLibrary.voicing(named: ChordLibrary.defaultPair.0)!
+                    let second = names.dropFirst().first.flatMap(ChordLibrary.voicing(named:)) ?? ChordLibrary.voicing(named: ChordLibrary.defaultPair.1)!
+                    let model = ChordChangeViewModel(first: first, second: second, context: runner.cards.context)
+                    model.logsStandalone = false   // the session's block carries the result
+                    change = model
+                    metronome = MetronomeViewModel(bpm: Double(UserDefaults.standard.integer(forKey: SettingsKey.lastBPM)).nonZero ?? 100)
                 }
             }
         default:
@@ -118,4 +139,8 @@ struct SessionSummaryPanel: View {
         }
         .padding()
     }
+}
+
+private extension Double {
+    var nonZero: Double? { self == 0 ? nil : self }
 }
