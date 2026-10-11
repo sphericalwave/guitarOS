@@ -1,6 +1,7 @@
 # guitar — practice app plan
 
-Status: planning only. No app code yet. Written 2026-10-08 after reading this repo, the sibling
+Status: M0–M10 and M11 theory flashcards shipped (2026-10-09 … 2026-10-11); see §8 for what each milestone
+did and what still needs the user. Written 2026-10-08 after reading this repo, the sibling
 piano app (`../piano`, incl. `feat/mic-note-detection`), `~/Documents/apps/Frameworks`, and the
 strike/shodan flashcard apps.
 
@@ -586,7 +587,16 @@ CloudKit cross-device check, first Xcode build provisions signing, switch piano 
 - Not yet: `.gp` (GP7/8) import, bends/slides judged, backing-vs-mic bleed handling (plan §9: wait mode is the
   safe default with the built-in mic), CloudKit check of song files across devices (user).
 
-- **M11: Extras.** MIDI guitar, theory flashcards. (Lesson scrolls parked.)
+**M11: Theory flashcards** — done 2026-10-11 (PR #12 `m11-theory-flashcards`)
+- [x] `TheoryDrill` (pure, seeded, generated from MusicTheoryKit): **Intervals** ("the major 3rd above D?" → the
+      note grid), **Scales** ("which note is not in A Dorian?" four notes, one outsider; major, natural minor,
+      pentatonics, blues, dorian/mixolydian/lydian/phrygian, harmonic minor), **Chords in a key** (diatonic
+      triads by roman numeral in major and natural minor, distractors from the same root and neighbouring
+      degrees), **Degrees** ("which degree is F♯ in D major?"). Due cards first; `theory` cards keyed
+      `theory:interval:M3`, `theory:scale:dorian`, `theory:chord:IV`, `theory:degree:6`; SM-2 3 s / 8 s.
+- [x] Practice → **Theory** page on both platforms (silent, no mic). Not in the routine: flashcards are a
+      between-sessions thing. **No schema change** (DrillKind `theory` already existed).
+- Remaining extras: MIDI guitar input, `.gp` (GP7/8) import. (Lesson scrolls parked.)
 
 ---
 
