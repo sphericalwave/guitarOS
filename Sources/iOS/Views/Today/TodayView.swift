@@ -8,6 +8,7 @@ struct TodayView: View {
     @Query(sort: \PracticeSession.startedAt, order: .reverse) private var sessions: [PracticeSession]
     @Query(filter: #Predicate<SkillCard> { $0.kind == "fretPosition" }) private var cards: [SkillCard]
     @Query(filter: #Predicate<SkillCard> { $0.kind == "chordChange" }) private var changeCards: [SkillCard]
+    @Query(filter: #Predicate<SkillCard> { $0.kind == "scaleShape" }) private var scaleCards: [SkillCard]
     @AppStorage(SettingsKey.dailyGoalMinutes) private var goalMinutes = 20
     @AppStorage(SettingsKey.leftHanded) private var leftHanded = false
     @AppStorage(SettingsKey.preferSharps) private var preferSharps = true
@@ -30,7 +31,8 @@ struct TodayView: View {
             dueFretCards: cards.filter { $0.srDueDate <= now }.count,
             learnedFretCards: cards.count,
             minutesDoneToday: Int(minutesToday),
-            chordBests: Dictionary(uniqueKeysWithValues: changeCards.compactMap { card in card.best.map { (card.key, $0) } })
+            chordBests: Dictionary(uniqueKeysWithValues: changeCards.compactMap { card in card.best.map { (card.key, $0) } }),
+            scaleKey: RoutineBuilder.scaleKey(cards: scaleCards.map { ($0.key, $0.srDueDate, $0.lastPracticed) })
         )
         return RoutineBuilder.routine(inputs).filter { !skipped.contains($0.id) }
     }

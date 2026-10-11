@@ -23,6 +23,9 @@ packages:
   PitchKit:
     url: https://github.com/sphericalwave/PitchKit.git
     branch: main
+  PlayAlongKit:
+    url: https://github.com/sphericalwave/PlayAlongKit.git
+    branch: main
 
 settings:
   base:
@@ -45,6 +48,7 @@ targets:
       - package: SwCharts
       - package: MusicTheoryKit
       - package: PitchKit
+      - package: PlayAlongKit
     sources:
       - path: Sources/Shared
       - path: Sources/iOS
