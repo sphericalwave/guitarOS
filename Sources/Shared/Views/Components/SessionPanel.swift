@@ -14,6 +14,7 @@ struct SessionPanel: View {
     @State private var tuner: TunerViewModel?
     @State private var drill: FretboardDrillViewModel?
     @State private var change: ChordChangeViewModel?
+    @State private var scale: ScaleDrillViewModel?
     @State private var metronome: MetronomeViewModel?
 
     var body: some View {
@@ -25,7 +26,7 @@ struct SessionPanel: View {
                 block(item)
             }
         }
-        .onChange(of: runner.index) { tuner = nil; drill = nil; change = nil; metronome?.stop(); metronome = nil }
+        .onChange(of: runner.index) { tuner = nil; drill = nil; change = nil; scale = nil; metronome?.stop(); metronome = nil }
     }
 
     private func header(_ item: RoutineItem) -> some View {
@@ -86,6 +87,28 @@ struct SessionPanel: View {
                     model.logsStandalone = false   // the session's block carries the result
                     change = model
                     metronome = MetronomeViewModel(bpm: Double(UserDefaults.standard.integer(forKey: SettingsKey.lastBPM)).nonZero ?? 100)
+                }
+            }
+        case .scale:
+            if let scale {
+                ScaleDrillPanel(model: scale, fretboard: fretboard, leftHanded: leftHanded, preferSharps: preferSharps) {
+                    if case .finished(let result) = scale.phase {
+                        runner.completeBlock(attempts: result.notes, correct: result.hits, score: result.accuracy, bpm: result.mode == .timed ? Int(result.bpm) : nil)
+                    } else {
+                        runner.completeBlock()
+                    }
+                }
+            } else {
+                ProgressView().task {
+                    let tuning = fretboard.tuning
+                    let position = ScaleShapes.position(forKey: item.detail ?? "", tuning: tuning) ?? ScaleShapes.position(forKey: RoutineBuilder.defaultScaleKey, tuning: tuning)!
+                    let mode = ScaleDrill.Mode(rawValue: UserDefaults.standard.string(forKey: SettingsKey.scaleMode) ?? "") ?? .wait
+                    let bpm = Double(UserDefaults.standard.integer(forKey: SettingsKey.scaleBPM)).nonZero ?? ScaleDrill.defaultBPM
+                    let click = MetronomeViewModel(bpm: bpm)
+                    metronome = click
+                    let model = ScaleDrillViewModel(position: position, mode: mode, bpm: bpm, audio: audio, context: runner.cards.context, metronome: click)
+                    model.logsStandalone = false   // the session's block carries the result
+                    scale = model
                 }
             }
         default:

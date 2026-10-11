@@ -509,8 +509,26 @@ CloudKit cross-device check, first Xcode build provisions signing, switch piano 
 - [ ] **Gate (user):** record ~20 clips (unplugged + USB, several chords, a few deliberately muted) and hand
       them over; then tune `StrumAnalyzer` on them and decide whether auto-count becomes the default.
       Data survival: no schema change.
-- **M7: Scales/modes/CAGED.** Shape generator, `PlayAlongKit` extraction, wait mode + timed mode,
-  speed trainer (+N BPM per clean pass), `scaleShape` cards.
+**M7: Scales/modes/CAGED** — done 2026-10-11 (PR #8 `m7-scales-caged`)
+- [x] **`PlayAlongKit`** extracted (`Frameworks/Music/PlayAlongKit`, github.com/sphericalwave/PlayAlongKit, private,
+      remote dependency): `ExpectedNote` (id, time, pitch, part), `PlayAlongJudge` (window configurable),
+      `WaitGate`, `WaitRunner` (+ `isFinished`), 17 tests. piano still has its own copies (separate piano PR).
+- [x] `ScaleShapes.caged(scale, tuning)`: five four-fret windows placed by the CAGED shape offsets from the
+      (relative) major root's fret on the low string (E −1, D +1, C +4, A +6, G +9), numbered low-to-high;
+      `ScalePosition` = every scale note in the window ascending, `sequence` up and down, key
+      `scale:<root>:<kind>:<index>`; works for every `Scale.Kind.common` and any tuning. A minor pentatonic
+      box 1 lands on frets 5–8, C major's E shape on 7–10 (tests).
+- [x] `ScaleDrill`: **Wait for me** (YIN pitch, two agreeing readings, strays shown as a red ✕ in the box) and
+      **With the click** (one note per beat after a one-bar count-in, `PlayAlongJudge` ±250 ms on PitchKit
+      note-on strike times); result = accuracy, strays, offset; clean (≥ 90 %, few strays) → +5 BPM next time.
+      `scaleShape` cards: `best` = highest clean BPM, SM-2 quality from the pass.
+- [x] Practice → **Scales** page (root, scale, position 1–5 with shape letter, mode, BPM stepper, box preview
+      with roots filled and degrees hollow). Routine gets a 3-min scale block (most overdue card, else least
+      recent, else A minor pentatonic box 1) between chords and free practice; standalone passes log a
+      one-block session. Data survival: no schema change (SkillCard kind `scaleShape`, PracticeBlock.bpm).
+- Deviation: the click still runs on its own engine; timed mode anchors the judge to the host clock at
+  `metronome.start()`, so a few ms of engine start-up land inside the ±250 ms window. Unify with the mic engine
+  in M8 where rhythm judging needs the exact beat↔host mapping.
 - **M8: Rhythm trainer.** Onset vs click, timing histogram, subdivision drills.
 - **M9: Ear training.** Intervals, chord quality, functional scale degrees, mic play-back
   (Karplus–Strong reference tones; sampler later).

@@ -34,6 +34,12 @@ nonisolated enum SettingsKey {
     static let chordPair = "chordPair"
     /// Practice tab page: "notes" or "chords".
     static let practicePage = "practicePage"
+    /// Scales page: root pitch class, `ScaleShapes.kindKey`, CAGED position 1–5, `ScaleDrill.Mode`, BPM.
+    static let scaleRoot = "scaleRoot"
+    static let scaleKind = "scaleKind"
+    static let scalePosition = "scalePosition"
+    static let scaleMode = "scaleMode"
+    static let scaleBPM = "scaleBPM"
     /// Beta: the mic counts chord changes instead of the player. Off until it beats self-counting on real clips.
     static let autoCountChords = "autoCountChords"
     /// Name of the guitar typed for the last test clip, the field's placeholder.

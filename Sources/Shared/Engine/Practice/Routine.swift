@@ -53,6 +53,19 @@ nonisolated enum RoutineBuilder {
         var minutesDoneToday: Int = 0
         /// Best changes/min per pair key ("change:C>G"); the weakest pair is drilled.
         var chordBests: [String: Double] = [:]
+        /// Scale position card key to play ("scale:9:minorPentatonic:3"); nil picks the default box.
+        var scaleKey: String? = nil
+    }
+
+    /// A minor pentatonic, box 1: where most players start.
+    static let defaultScaleKey = "scale:9:minorPentatonic:3"
+    static let scaleMinutes = 3
+
+    /// The scale position to drill today: the most overdue card, else the least recently played, else the default.
+    static func scaleKey(cards: [(key: String, due: Date, lastPracticed: Date?)], now: Date = .now) -> String {
+        if let due = cards.filter({ $0.due <= now }).min(by: { $0.due < $1.due }) { return due.key }
+        if let stale = cards.min(by: { ($0.lastPracticed ?? .distantPast) < ($1.lastPracticed ?? .distantPast) }) { return stale.key }
+        return defaultScaleKey
     }
 
     /// Seconds a fretboard card takes on average, for sizing the block.
@@ -75,6 +88,10 @@ nonisolated enum RoutineBuilder {
             let pair = ChordChangeDrill.weakestPair(bests: inputs.chordBests) ?? ChordLibrary.defaultPair
             items.append(RoutineItem(kind: .chordChange, title: "\(pair.0) → \(pair.1)", minutes: 2, detail: "\(pair.0)>\(pair.1)"))
             left -= 2
+        }
+        if left >= scaleMinutes, let position = ScaleShapes.position(forKey: inputs.scaleKey ?? defaultScaleKey) {
+            items.append(RoutineItem(kind: .scale, title: "\(position.scale.name(preferSharps: true)) · position \(position.index)", minutes: scaleMinutes, detail: position.key))
+            left -= scaleMinutes
         }
         if left > 0 {
             items.append(RoutineItem(kind: .free, title: "Free practice", minutes: left))
