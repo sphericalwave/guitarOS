@@ -532,6 +532,23 @@ CloudKit cross-device check, first Xcode build provisions signing, switch piano 
 - **M8: Rhythm trainer.** Onset vs click, timing histogram, subdivision drills.
 - **M9: Ear training.** Intervals, chord quality, functional scale degrees, mic play-back
   (Karplus–Strong reference tones; sampler later).
+- **M10 status (paused 2026-10-11, branch `m10-guitar-pro`, WIP commit, no PR):**
+  - Done: `Shared/Engine/GuitarPro/` — `TabScore` model, `GP5Reader` (v5.00 + v5.10), `TabTimeline` (repeat/alt-ending
+    unroll, tempo map, `expectedNotes(track:)`); `Tests/guitarTests/GuitarProTests.swift` (byte fixture builder,
+    reader + timeline tests pass; a smoke test over `~/Documents/GuitarPro/*.gp5` that skips when absent).
+  - Real-file status via a CLI harness: 5 of 7 parse with sane durations (Mozart 68 s, Resistance 309 s). The two
+    **v5.00** files (Prokofiev, Back To The Future) failed inside the mix-table change; the last edit (mix-table RSE
+    block is 16 bytes and a wah byte follows in both versions; effect strings read only when they look like
+    strings) is **untested** — rerun the smoke test / harness first. Earlier finding: the final line-break byte is
+    absent at EOF (handled).
+  - Format gotchas found: v5.10 files from the wild omit the mix-table RSE effect name/category strings.
+  - GeneralUser GS v2.0.3 SF2 (32 MB, permissive licence v2.0, `github.com/mrbumpy409/GeneralUser-GS`) was
+    downloaded to the job tmp dir only; not yet in `Resources/` (add + record the licence in README).
+  - Next: `Song` SwiftData model (+ `PracticeBlock.song` inverse, schema bump, state data survival), `.gp5` import
+    via `.fileImporter` (declare an imported UTType in project.yml), `SongPlayer` (AVAudioSequencer + per-track
+    `AVAudioUnitSampler` on the SF2, my-track mute, rate, A–B loop, count-in), `SongPlayAlongViewModel`
+    (`WaitRunner` on `AudioHub.heardPitches`, `PlayAlongJudge` on note-ons), `TabStripLayout` + `TabStripView`,
+    Songs tab (iOS 5th tab / macOS sidebar), PLAN + tests, then the usual gates.
 - **M10: Songs (Guitar Pro).** Moved up to right after M7: songs are a stronger motivator than
   rhythm/ear drills, and the scale play-along engine (M7) is most of the work. Order becomes
   M6 → M7 → **M10** → M8 → M9.
