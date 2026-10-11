@@ -17,6 +17,11 @@ nonisolated final class ClickTrack: @unchecked Sendable {
         var rendered = 0
         var lastBeat = -1
         var volume: Float = 0.8
+        /// Host-clock time at which `anchorSample` left the render callback, from the last buffer's timestamp.
+        var anchorHostTime: TimeInterval?
+        var anchorSample = 0
+        /// Buffer-to-speaker delay the output reports.
+        var outputLatency: TimeInterval = 0
     }
 
     /// Reference wrapper so the render block can capture the (noncopyable) mutex.
@@ -47,14 +52,26 @@ nonisolated final class ClickTrack: @unchecked Sendable {
     var isRunning: Bool { shared.state.withLock { $0.isRunning } }
 
     func start() throws {
+        let latency = engine.outputNode.presentationLatency
         shared.state.withLock {
             $0.isRunning = true
             $0.startSample = $0.rendered
             $0.lastBeat = -1
+            $0.outputLatency = latency
         }
         if !engine.isRunning {
             engine.prepare()
             try engine.start()
+        }
+    }
+
+    /// Fractional beat (0 = the first click) that was sounding at a host-clock moment, so a strike timed by the
+    /// microphone can be judged against the grid. Nil until the click has rendered a buffer.
+    func beat(atHostTime hostTime: TimeInterval) -> Double? {
+        shared.state.withLock { st -> Double? in
+            guard st.isRunning, let anchor = st.anchorHostTime else { return nil }
+            let sample = Double(st.anchorSample) + (hostTime - anchor - st.outputLatency) * sampleRate
+            return (sample - Double(st.startSample)) / st.schedule.samplesPerBeat
         }
     }
 
@@ -82,19 +99,24 @@ nonisolated final class ClickTrack: @unchecked Sendable {
     /// Click samples: a 4 ms sine burst, higher and louder on the accent.
     private static func makeSource(shared: Shared, sampleRate: Double, continuation: AsyncStream<Beat>.Continuation) -> AVAudioSourceNode {
         let clickLength = Int(sampleRate * 0.004)
-        return AVAudioSourceNode { (_: UnsafeMutablePointer<ObjCBool>, _: UnsafePointer<AudioTimeStamp>, frameCount: AVAudioFrameCount, bufferList: UnsafeMutablePointer<AudioBufferList>) -> OSStatus in
-            render(shared: shared, sampleRate: sampleRate, clickLength: clickLength, continuation: continuation, frameCount: Int(frameCount), bufferList: bufferList)
+        return AVAudioSourceNode { (_: UnsafeMutablePointer<ObjCBool>, timestamp: UnsafePointer<AudioTimeStamp>, frameCount: AVAudioFrameCount, bufferList: UnsafeMutablePointer<AudioBufferList>) -> OSStatus in
+            let hostTime = timestamp.pointee.mFlags.contains(.hostTimeValid) ? AVAudioTime.seconds(forHostTime: timestamp.pointee.mHostTime) : nil
+            return render(shared: shared, sampleRate: sampleRate, clickLength: clickLength, continuation: continuation, frameCount: Int(frameCount), hostTime: hostTime, bufferList: bufferList)
         }
     }
 
     private static func render(shared: Shared, sampleRate: Double, clickLength: Int, continuation: AsyncStream<Beat>.Continuation,
-                               frameCount count: Int, bufferList: UnsafeMutablePointer<AudioBufferList>) -> OSStatus {
+                               frameCount count: Int, hostTime: TimeInterval?, bufferList: UnsafeMutablePointer<AudioBufferList>) -> OSStatus {
         let buffers = UnsafeMutableAudioBufferListPointer(bufferList)
         guard let out = buffers.first?.mData?.assumingMemoryBound(to: Float.self) else { return noErr }
         for i in 0..<count { out[i] = 0 }
 
         shared.state.withLock { st in
             defer { st.rendered += count }
+            if let hostTime {
+                st.anchorHostTime = hostTime
+                st.anchorSample = st.rendered
+            }
             guard st.isRunning else { return }
             let range = st.rendered..<(st.rendered + count)
             // Clicks that started in a previous buffer may still be ringing into this one.

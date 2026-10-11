@@ -529,7 +529,20 @@ CloudKit cross-device check, first Xcode build provisions signing, switch piano 
 - Deviation: the click still runs on its own engine; timed mode anchors the judge to the host clock at
   `metronome.start()`, so a few ms of engine start-up land inside the ±250 ms window. Unify with the mic engine
   in M8 where rhythm judging needs the exact beat↔host mapping.
-- **M8: Rhythm trainer.** Onset vs click, timing histogram, subdivision drills.
+**M8: Rhythm trainer** — done 2026-10-11 (PR #10 `m8-rhythm`)
+- [x] `ClickTrack` now keeps a host-time anchor from each render buffer's timestamp (+ output latency), so
+      `beat(atHostTime:)` maps a microphone strike to a fractional beat; `MetronomeViewModel` exposes it. The
+      click stays on its own output engine (the mapping made unifying unnecessary for judging).
+- [x] `OnsetAnalyzer` (PitchKit `OnsetDetector` on a 1024 window / 256 hop over the hub's input tap, strike
+      times with the input's latency taken off; test: four plucks heard once each within 20 ms) and
+      `RhythmJudge` (pure: nearest grid point of the subdivision, ms offset early < 0 < late, ±40 ms on time,
+      strays beyond 45 % of a step ignored, missed grid points counted, mean → "Rushing/Dragging by N ms",
+      σ as the spread, SM-2 quality).
+- [x] Practice → **Rhythm**: subdivision (quarters/eighths/triplets/sixteenths), BPM, bars; one-bar count-in,
+      beat dots, a live early/late needle per strike, then on-time %, tendency, spread and SwCharts'
+      `NormalDistributionChart` of the offsets. `rhythm` cards (key `rhythm:<subdivision>`, `best` = tightest
+      spread). Routine adds a 2-min "Strum on the click" block when the day has room (≥ 7 min left after
+      scales). Session blocks log strikes/on-time/σ/BPM. No schema change (new DrillKind raw value only).
 - **M9: Ear training.** Intervals, chord quality, functional scale degrees, mic play-back
   (Karplus–Strong reference tones; sampler later).
 **M10: Songs (Guitar Pro)** — done 2026-10-11 (PR #9 `m10-guitar-pro`)

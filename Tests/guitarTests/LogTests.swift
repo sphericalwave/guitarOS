@@ -7,7 +7,7 @@ struct RoutineBuilderTests {
     @Test func startsWithTuningAndFillsToTheGoal() {
         let routine = RoutineBuilder.routine(.init(goalMinutes: 20, dueFretCards: 15, learnedFretCards: 30))
         #expect(routine.first?.kind == .tuner)
-        #expect(routine.map(\.kind) == [.tuner, .fretboard, .chordChange, .scale, .free])
+        #expect(routine.map(\.kind) == [.tuner, .fretboard, .chordChange, .scale, .rhythm, .free])
         #expect(RoutineBuilder.totalMinutes(routine) == 20)
         #expect(routine[1].title == "15 due notes")
         #expect(routine[1].minutes == 3)  // 15 × 12 s = 3 min
@@ -20,7 +20,7 @@ struct RoutineBuilderTests {
 
     @Test func nothingDueAndNeckKnownMeansNoFretboardBlock() {
         let routine = RoutineBuilder.routine(.init(goalMinutes: 10, dueFretCards: 0, learnedFretCards: 40))
-        #expect(routine.map(\.kind) == [.tuner, .chordChange, .scale, .free])
+        #expect(routine.map(\.kind) == [.tuner, .chordChange, .scale, .free], "a 10-minute day has no room for rhythm")
     }
 
     @Test func resumedDayPlansOnlyTheRemainder() {
