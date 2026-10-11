@@ -40,6 +40,10 @@ nonisolated enum SettingsKey {
     static let scalePosition = "scalePosition"
     static let scaleMode = "scaleMode"
     static let scaleBPM = "scaleBPM"
+    /// Rhythm page: `RhythmJudge.Subdivision` raw value, BPM, bars per pass.
+    static let rhythmSubdivision = "rhythmSubdivision"
+    static let rhythmBPM = "rhythmBPM"
+    static let rhythmBars = "rhythmBars"
     /// Beta: the mic counts chord changes instead of the player. Off until it beats self-counting on real clips.
     static let autoCountChords = "autoCountChords"
     /// Name of the guitar typed for the last test clip, the field's placeholder.

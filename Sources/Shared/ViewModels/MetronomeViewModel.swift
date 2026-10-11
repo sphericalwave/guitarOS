@@ -23,6 +23,9 @@ final class MetronomeViewModel {
 
     func toggle() { isRunning ? stop() : start() }
 
+    /// Fractional beat (0 = the first click) sounding at a host-clock moment, for judging strikes against the grid.
+    func beat(atHostTime hostTime: TimeInterval) -> Double? { track.beat(atHostTime: hostTime) }
+
     func start() {
         do {
             try track.start()

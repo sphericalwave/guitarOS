@@ -60,6 +60,9 @@ nonisolated enum RoutineBuilder {
     /// A minor pentatonic, box 1: where most players start.
     static let defaultScaleKey = "scale:9:minorPentatonic:3"
     static let scaleMinutes = 3
+    /// Strumming on the click: short, and only when the day has room after the free block.
+    static let rhythmMinutes = 2
+    static let rhythmDetail = "quarters"
 
     /// The scale position to drill today: the most overdue card, else the least recently played, else the default.
     static func scaleKey(cards: [(key: String, due: Date, lastPracticed: Date?)], now: Date = .now) -> String {
@@ -92,6 +95,10 @@ nonisolated enum RoutineBuilder {
         if left >= scaleMinutes, let position = ScaleShapes.position(forKey: inputs.scaleKey ?? defaultScaleKey) {
             items.append(RoutineItem(kind: .scale, title: "\(position.scale.name(preferSharps: true)) · position \(position.index)", minutes: scaleMinutes, detail: position.key))
             left -= scaleMinutes
+        }
+        if left >= rhythmMinutes + 5 {
+            items.append(RoutineItem(kind: .rhythm, title: "Strum on the click", minutes: rhythmMinutes, detail: rhythmDetail))
+            left -= rhythmMinutes
         }
         if left > 0 {
             items.append(RoutineItem(kind: .free, title: "Free practice", minutes: left))

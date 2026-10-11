@@ -15,6 +15,7 @@ struct SessionPanel: View {
     @State private var drill: FretboardDrillViewModel?
     @State private var change: ChordChangeViewModel?
     @State private var scale: ScaleDrillViewModel?
+    @State private var rhythm: RhythmDrillViewModel?
     @State private var metronome: MetronomeViewModel?
 
     var body: some View {
@@ -26,7 +27,7 @@ struct SessionPanel: View {
                 block(item)
             }
         }
-        .onChange(of: runner.index) { tuner = nil; drill = nil; change = nil; scale = nil; metronome?.stop(); metronome = nil }
+        .onChange(of: runner.index) { tuner = nil; drill = nil; change = nil; scale = nil; rhythm = nil; metronome?.stop(); metronome = nil }
     }
 
     private func header(_ item: RoutineItem) -> some View {
@@ -109,6 +110,26 @@ struct SessionPanel: View {
                     let model = ScaleDrillViewModel(position: position, mode: mode, bpm: bpm, audio: audio, context: runner.cards.context, metronome: click)
                     model.logsStandalone = false   // the session's block carries the result
                     scale = model
+                }
+            }
+        case .rhythm:
+            if let rhythm {
+                RhythmDrillPanel(model: rhythm) {
+                    if case .finished(let summary) = rhythm.phase {
+                        runner.completeBlock(attempts: summary.strikes + summary.missed, correct: summary.onTime, score: summary.standardDeviation, bpm: Int(rhythm.bpm))
+                    } else {
+                        runner.completeBlock()
+                    }
+                }
+            } else {
+                ProgressView().task {
+                    let bpm = Double(UserDefaults.standard.integer(forKey: SettingsKey.rhythmBPM)).nonZero ?? 80
+                    let subdivision = RhythmJudge.Subdivision(rawValue: UserDefaults.standard.integer(forKey: SettingsKey.rhythmSubdivision)) ?? .quarters
+                    let click = MetronomeViewModel(bpm: bpm)
+                    metronome = click
+                    let model = RhythmDrillViewModel(bpm: bpm, subdivision: subdivision, bars: 4, audio: audio, metronome: click, context: runner.cards.context)
+                    model.logsStandalone = false   // the session's block carries the result
+                    rhythm = model
                 }
             }
         default:

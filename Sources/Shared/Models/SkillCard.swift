@@ -39,5 +39,5 @@ extension SkillCard: SpacedRepetitionCard {}
 
 /// What kind of skill a card tracks.
 nonisolated enum DrillKind: String, CaseIterable, Sendable {
-    case fretPosition, chordShape, chordChange, scaleShape, interval, theory
+    case fretPosition, chordShape, chordChange, scaleShape, interval, theory, rhythm
 }
