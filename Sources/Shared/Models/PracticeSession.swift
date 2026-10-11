@@ -39,6 +39,8 @@ final class PracticeBlock {
     /// Kind-specific: changes/min, timing σ ms, accuracy.
     var score: Double?
     var session: PracticeSession?
+    /// The song a song block practised (M10).
+    var song: Song?
 
     init(kind: String, title: String, startedAt: Date = .now) {
         self.kind = kind

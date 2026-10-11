@@ -78,6 +78,17 @@ targets:
           - UIInterfaceOrientationPortrait
         UIRequiresFullScreen: true
         LSApplicationCategoryType: public.app-category.music
+        # Guitar Pro 5 tabs, so the file importer can offer them.
+        UTImportedTypeDeclarations:
+          - UTTypeIdentifier: com.sphericalwave.music.guitar.gp5
+            UTTypeDescription: Guitar Pro 5 tab
+            UTTypeConformsTo: [public.data]
+            UTTypeTagSpecification:
+              public.filename-extension: [gp5]
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Guitar Pro 5 tab
+            LSItemContentTypes: [com.sphericalwave.music.guitar.gp5]
+            LSHandlerRank: Alternate
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.sphericalwave.music.guitar

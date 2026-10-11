@@ -1,9 +1,9 @@
 import Foundation
 
-/// The four top-level sections: tabs on iOS, sidebar rows on macOS.
+/// The five top-level sections: tabs on iOS, sidebar rows on macOS.
 /// Raw values are persisted (`@AppStorage`), so keep them stable.
 nonisolated enum AppSection: String, CaseIterable, Identifiable, Sendable {
-    case today, practice, progress, tools
+    case today, practice, songs, progress, tools
 
     var id: String { rawValue }
 
@@ -11,6 +11,7 @@ nonisolated enum AppSection: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .today: "Today"
         case .practice: "Practice"
+        case .songs: "Songs"
         case .progress: "Progress"
         case .tools: "Tools"
         }
@@ -20,6 +21,7 @@ nonisolated enum AppSection: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .today: "sun.max"
         case .practice: "guitars"
+        case .songs: "music.quarternote.3"
         case .progress: "chart.bar"
         case .tools: "tuningfork"
         }
