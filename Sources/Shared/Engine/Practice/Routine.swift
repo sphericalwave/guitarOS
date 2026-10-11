@@ -63,6 +63,8 @@ nonisolated enum RoutineBuilder {
     /// Strumming on the click: short, and only when the day has room after the free block.
     static let rhythmMinutes = 2
     static let rhythmDetail = "quarters"
+    /// A few ear questions, on the longest days.
+    static let earMinutes = 2
 
     /// The scale position to drill today: the most overdue card, else the least recently played, else the default.
     static func scaleKey(cards: [(key: String, due: Date, lastPracticed: Date?)], now: Date = .now) -> String {
@@ -99,6 +101,10 @@ nonisolated enum RoutineBuilder {
         if left >= rhythmMinutes + 5 {
             items.append(RoutineItem(kind: .rhythm, title: "Strum on the click", minutes: rhythmMinutes, detail: rhythmDetail))
             left -= rhythmMinutes
+        }
+        if left >= earMinutes + 10 {
+            items.append(RoutineItem(kind: .ear, title: "Ear: intervals", minutes: earMinutes, detail: EarDrill.Mode.interval.rawValue))
+            left -= earMinutes
         }
         if left > 0 {
             items.append(RoutineItem(kind: .free, title: "Free practice", minutes: left))

@@ -543,8 +543,18 @@ CloudKit cross-device check, first Xcode build provisions signing, switch piano 
       `NormalDistributionChart` of the offsets. `rhythm` cards (key `rhythm:<subdivision>`, `best` = tightest
       spread). Routine adds a 2-min "Strum on the click" block when the day has room (≥ 7 min left after
       scales). Session blocks log strikes/on-time/σ/BPM. No schema change (new DrillKind raw value only).
-- **M9: Ear training.** Intervals, chord quality, functional scale degrees, mic play-back
-  (Karplus–Strong reference tones; sampler later).
+**M9: Ear training** — done 2026-10-11 (PR #11 `m9-ear`)
+- [x] `PluckSynth` (Karplus–Strong, triangle pluck, in `Shared/Engine/Audio`) + `TonePlayer` (own output engine,
+      `AVAudioSourceNode` streaming a rendered phrase; `isPlaying` so the mic waits for the tone to end).
+- [x] `EarDrill` (pure, seeded): **Intervals** (levels add m2/TT/m6/M7 and unison to P5/P8/M3/P4, m3/M2/M6/m7;
+      70 % ascending), **Chords** (major/minor → dim/aug → 7ths → sus/half-dim/dim7, blocked or rolled),
+      **Degrees** (tonic then a major-scale degree, 1–7), **Play it back** (2+level-note major-pentatonic phrase,
+      graded by pitch class in order via the YIN pitch, octave forgiven). Due cards are asked first; keys
+      `ear:interval:P5`, `ear:chord:m7`, `ear:degree:4`, `ear:playback:4`; SM-2 with 3 s / 8 s thresholds.
+- [x] Practice → **Ear** page (mode, level 1–4, due count; Play again, choice buttons that colour right/wrong,
+      the heard phrase for play-back). The iOS Practice page picker is now a menu (five pages). Routine adds a
+      2-min "Ear: intervals" block on the longest days (≥ 12 min left after rhythm). No schema change.
+- Not yet: minor-key degrees, chord inversions, sampler-based tones (plan said later), ear stats on Progress.
 **M10: Songs (Guitar Pro)** — done 2026-10-11 (PR #9 `m10-guitar-pro`)
 - [x] `Shared/Engine/GuitarPro/`: `TabScore` (headers, tracks, two voices, beats, notes with effect flags),
       `GP5Reader` (v5.00 + v5.10; info, lyrics, RSE/page setup skipped, tempo + per-beat changes, time

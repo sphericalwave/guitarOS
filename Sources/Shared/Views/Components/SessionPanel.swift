@@ -16,6 +16,8 @@ struct SessionPanel: View {
     @State private var change: ChordChangeViewModel?
     @State private var scale: ScaleDrillViewModel?
     @State private var rhythm: RhythmDrillViewModel?
+    @State private var ear: EarDrillViewModel?
+    @State private var tones = TonePlayer()
     @State private var metronome: MetronomeViewModel?
 
     var body: some View {
@@ -27,7 +29,7 @@ struct SessionPanel: View {
                 block(item)
             }
         }
-        .onChange(of: runner.index) { tuner = nil; drill = nil; change = nil; scale = nil; rhythm = nil; metronome?.stop(); metronome = nil }
+        .onChange(of: runner.index) { tuner = nil; drill = nil; change = nil; scale = nil; rhythm = nil; ear = nil; metronome?.stop(); metronome = nil }
     }
 
     private func header(_ item: RoutineItem) -> some View {
@@ -130,6 +132,21 @@ struct SessionPanel: View {
                     let model = RhythmDrillViewModel(bpm: bpm, subdivision: subdivision, bars: 4, audio: audio, metronome: click, context: runner.cards.context)
                     model.logsStandalone = false   // the session's block carries the result
                     rhythm = model
+                }
+            }
+        case .ear:
+            if let ear {
+                EarDrillPanel(model: ear) {
+                    runner.completeBlock(attempts: ear.correctCount + ear.wrongCount, correct: ear.correctCount)
+                }
+                .onChange(of: runner.isBlockTimeUp) { if runner.isBlockTimeUp, ear.phase != .finished { ear.stop(); runner.completeBlock(attempts: ear.correctCount + ear.wrongCount, correct: ear.correctCount) } }
+            } else {
+                ProgressView().task {
+                    let mode = EarDrill.Mode(rawValue: item.detail ?? "") ?? .interval
+                    let level = max(1, UserDefaults.standard.integer(forKey: SettingsKey.earLevel))
+                    let model = EarDrillViewModel(mode: mode, level: level, audio: audio, tones: tones, cards: runner.cards)
+                    model.start()
+                    ear = model
                 }
             }
         default:
