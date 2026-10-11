@@ -532,45 +532,37 @@ CloudKit cross-device check, first Xcode build provisions signing, switch piano 
 - **M8: Rhythm trainer.** Onset vs click, timing histogram, subdivision drills.
 - **M9: Ear training.** Intervals, chord quality, functional scale degrees, mic play-back
   (Karplus–Strong reference tones; sampler later).
-- **M10 status (paused 2026-10-11, branch `m10-guitar-pro`, WIP commit, no PR):**
-  - Done: `Shared/Engine/GuitarPro/` — `TabScore` model, `GP5Reader` (v5.00 + v5.10), `TabTimeline` (repeat/alt-ending
-    unroll, tempo map, `expectedNotes(track:)`); `Tests/guitarTests/GuitarProTests.swift` (byte fixture builder,
-    reader + timeline tests pass; a smoke test over `~/Documents/GuitarPro/*.gp5` that skips when absent).
-  - Real-file status via a CLI harness: 5 of 7 parse with sane durations (Mozart 68 s, Resistance 309 s). The two
-    **v5.00** files (Prokofiev, Back To The Future) failed inside the mix-table change; the last edit (mix-table RSE
-    block is 16 bytes and a wah byte follows in both versions; effect strings read only when they look like
-    strings) is **untested** — rerun the smoke test / harness first. Earlier finding: the final line-break byte is
-    absent at EOF (handled).
-  - Format gotchas found: v5.10 files from the wild omit the mix-table RSE effect name/category strings.
-  - GeneralUser GS v2.0.3 SF2 (32 MB, permissive licence v2.0, `github.com/mrbumpy409/GeneralUser-GS`) was
-    downloaded to the job tmp dir only; not yet in `Resources/` (add + record the licence in README).
-  - Next: `Song` SwiftData model (+ `PracticeBlock.song` inverse, schema bump, state data survival), `.gp5` import
-    via `.fileImporter` (declare an imported UTType in project.yml), `SongPlayer` (AVAudioSequencer + per-track
-    `AVAudioUnitSampler` on the SF2, my-track mute, rate, A–B loop, count-in), `SongPlayAlongViewModel`
-    (`WaitRunner` on `AudioHub.heardPitches`, `PlayAlongJudge` on note-ons), `TabStripLayout` + `TabStripView`,
-    Songs tab (iOS 5th tab / macOS sidebar), PLAN + tests, then the usual gates.
-- **M10: Songs (Guitar Pro).** Moved up to right after M7: songs are a stronger motivator than
-  rhythm/ear drills, and the scale play-along engine (M7) is most of the work. Order becomes
-  M6 → M7 → **M10** → M8 → M9.
-  - **`.gp5` parser first.** There are 7 `.gp5` files on this Mac and no `.gp`/`.gpx`. It's a
-    documented little-endian binary format. Read PyGuitarPro / TuxGuitar (LGPL) and alphaTab
-    (MPL-2.0) for the format only, and don't copy code (piano's rule for reference apps). Pure Swift
-    in `Shared/Engine/GuitarPro/` until a second app needs it.
-  - v1 scope: tracks + string tunings + capo, measures, time/key signatures, tempo changes,
-    repeats, beats/rests/durations/dots/tuplets/ties, notes (string, fret). Effects (bends, slides,
-    hammer-ons, palm mute) are parsed and shown as markers but not judged.
-  - `TabScore` model → `[ExpectedEvent]` for `PlayAlongKit` (wait mode + play-along); track picker
-    (which track is "you"); `TabStripView`; loop A–B + slow-down; count-in from `ClickTrack`.
-  - **Backing playback is in scope (user wants it).** Your track muted by default (toggle "play my
-    part"); every other track plays through `AVAudioUnitSampler` loaded with a bundled General MIDI
-    SF2 bank, GM programs per track from the GP file, drums on channel 10. Candidate banks:
-    **GeneralUser GS** (~30 MB SF2, permissive licence) or FluidR3_GM (MIT, ~140 MB, too big).
-    Confirm the licence and record it in README like piano's CC0 piano. `AVAudioUnitSampler` takes
-    SF2/DLS, not SF3. Per-track mute/solo/volume, tempo scale without pitch change, same clock as
-    the judge (piano's single-clock rule).
-  - Tests: build `.gp5` byte fixtures in test code (piano's MIDI fixture pattern). The 7 real files
-    are copyrighted tabs, so they're used for a manual local smoke test only, never committed.
-  - Then `.gp` (GP7/8: zip + `score.gpif` XML). `.gpx` (GP6) and MIDI import only if needed.
+**M10: Songs (Guitar Pro)** — done 2026-10-11 (PR #9 `m10-guitar-pro`)
+- [x] `Shared/Engine/GuitarPro/`: `TabScore` (headers, tracks, two voices, beats, notes with effect flags),
+      `GP5Reader` (v5.00 + v5.10; info, lyrics, RSE/page setup skipped, tempo + per-beat changes, time
+      signatures, repeats, alternate endings, markers, chords names, text, durations/dots/tuplets, rests, ties,
+      dead notes, velocity), `TabTimeline` (repeat unrolling, tempo map, seconds per note, `expectedNotes(track:)`),
+      `TabStripLayout`. Tests build `.gp5` bytes in code (`GP5Fixture`); a smoke test parses
+      `~/Documents/GuitarPro/*.gp5` when present and skips otherwise. **All 7 of the user's files parse** with
+      sane durations (68 s – 309 s).
+  - Format gotchas: the final line-break byte is absent at EOF; the mix-table RSE block is 16 bytes in both
+    versions (the track's is 15 in 5.00) and a wah byte follows in both; the RSE effect name/category strings
+    after it are often missing in 5.10 files, so they're read only when the bytes look like a string.
+- [x] `Song` model (external-storage file, track, capo, last position, best accuracy) + `PracticeBlock.song`
+      (nullify, inverse). Schema now [SkillCard, PracticeSession, PracticeBlock, Song]. **Data survival:** a new
+      entity and one new optional relationship → lightweight migration; existing cards and sessions survive.
+- [x] `SongPlayer`: `AVAudioSequencer` at 60 BPM (timeline seconds schedule directly) into one
+      `AVAudioUnitSampler` per track loaded from the bundled **GeneralUser GS v2.0.3** SF2 (32 MB, GM programs
+      from the file, drums bank for channel 10; licence free for any use, `licenses/GeneralUser-GS-LICENSE.txt`,
+      noted in README). Your track muted by default, speed 50–100 % without pitch change, A–B loop by bar,
+      one-bar count-in click, `position(atHostTime:)` for strike-time judging. Output-only engine; the mic stays
+      on `AudioHub`.
+- [x] `SongPlayAlongViewModel`: **Wait for me** (`WaitRunner` on `AudioHub.heardPitches` + note-ons; backing
+      pauses at the note until it's heard) and **Play along** (`PlayAlongJudge` on PitchKit strike times, hits/misses
+      drawn on the tab, best accuracy per song, pass logged as a `song` block). Upcoming pitches go to
+      `Prior.expected`.
+- [x] `TabStripView` (Canvas): string lines, bar numbers, markers, chord names, fret numbers coloured by verdict,
+      ties in brackets, dead notes as x, b / / / h / PM marks. Songs tab (iOS 5th tab; macOS sidebar): import via
+      `.fileImporter` (`UTImportedTypeDeclarations` for `.gp5`), list with best %, swipe/context delete; song
+      screen with transport, scrubber, mode picker and a Setup sheet (track, play my part, count-in, speed, loop).
+- Not yet: `.gp` (GP7/8) import, bends/slides judged, backing-vs-mic bleed handling (plan §9: wait mode is the
+  safe default with the built-in mic), CloudKit check of song files across devices (user).
+
 - **M11: Extras.** MIDI guitar, theory flashcards. (Lesson scrolls parked.)
 
 ---

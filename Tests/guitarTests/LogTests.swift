@@ -68,7 +68,7 @@ struct PracticeStatsTests {
 struct SessionRunnerTests {
     private func makeContext() throws -> (ModelContainer, ModelContext) {
         let container = try ModelContainer(
-            for: SkillCard.self, PracticeSession.self, PracticeBlock.self,
+            for: SkillCard.self, PracticeSession.self, PracticeBlock.self, Song.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         )
         return (container, container.mainContext)

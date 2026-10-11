@@ -27,8 +27,8 @@ struct RootView: View {
         case .today: TodayView()
         case .practice: PracticeView()
         case .progress: ProgressScreen()
+        case .songs: SongsView()
         case .tools: ToolsView()
-        default: PlaceholderScreen(section: section)
         }
     }
 }
