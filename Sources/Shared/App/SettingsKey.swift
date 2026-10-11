@@ -44,6 +44,9 @@ nonisolated enum SettingsKey {
     static let rhythmSubdivision = "rhythmSubdivision"
     static let rhythmBPM = "rhythmBPM"
     static let rhythmBars = "rhythmBars"
+    /// Ear page: `EarDrill.Mode` raw value and level 1–4.
+    static let earMode = "earMode"
+    static let earLevel = "earLevel"
     /// Beta: the mic counts chord changes instead of the player. Off until it beats self-counting on real clips.
     static let autoCountChords = "autoCountChords"
     /// Name of the guitar typed for the last test clip, the field's placeholder.

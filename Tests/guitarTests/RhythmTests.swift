@@ -73,7 +73,7 @@ struct OnsetAnalyzerTests {
 struct ClickTrackJudgingTests {
     @Test func routineAddsARhythmBlockOnLongerDays() {
         let routine = RoutineBuilder.routine(.init(goalMinutes: 25, dueFretCards: 0, learnedFretCards: 30))
-        #expect(routine.map(\.kind) == [.tuner, .chordChange, .scale, .rhythm, .free])
+        #expect(routine.map(\.kind) == [.tuner, .chordChange, .scale, .rhythm, .ear, .free])
         #expect(routine.first { $0.kind == .rhythm }?.minutes == 2)
         #expect(RoutineBuilder.totalMinutes(routine) == 25)
     }
