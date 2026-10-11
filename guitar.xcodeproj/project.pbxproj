@@ -8,17 +8,21 @@
 
 /* Begin PBXBuildFile section */
 		05D46B08F374DB6DC1CADCFD /* FretboardDrillViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8DC868069F54A1C211B5CF2 /* FretboardDrillViewModel.swift */; };
+		08F30885A752D63EBF754FCE /* TestClipPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F9B57509B291D8D4A87F29C /* TestClipPanel.swift */; };
 		0B9732191897CDBACD0F7D82 /* FretboardDrill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F968CB5F92ED06E5CD87B2D /* FretboardDrill.swift */; };
+		0DD96A40C4AA38033C40E2AC /* TestClipViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0317C831B21A977A8E7F63 /* TestClipViewModel.swift */; };
 		0EFB8344EF620DA0F6A04B8C /* PlaceholderScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 113FCB817117BFE3AD6D1BAE /* PlaceholderScreen.swift */; };
 		117F88BB77493B10E95B49AE /* LogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F92E687ACA7397D4369FA5 /* LogTests.swift */; };
 		14309DE40B4F7139B40161F0 /* AudioInputSelecting.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0AE221E51467492D4A7D359 /* AudioInputSelecting.swift */; };
 		18251E0116C13678B3B839AF /* ClickTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49E5C466E417A0173F641E8E /* ClickTrack.swift */; };
 		189243017F04B3F99C75B59D /* ToolsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4AFE5742BECD52865818D91 /* ToolsView.swift */; platformFilters = (macos, ); };
 		18F069E49BD5C3AD423CE1DB /* MusicTheoryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 511C66291DA61D1D55D8377E /* MusicTheoryKit */; };
+		19DD423D24538C021FEAD135 /* StrumAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52CE4FFCA5DCAA5E5D5FA0D /* StrumAnalyzer.swift */; };
 		2028E5742F21E265D9F0E910 /* ScrollKit in Frameworks */ = {isa = PBXBuildFile; productRef = ED1AF43E9A923E60266B0A2C /* ScrollKit */; };
 		22C5E09227EC9959F9B1721C /* PracticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D153AE1A3FB4CDD79949620 /* PracticeView.swift */; platformFilters = (macos, ); };
 		25013DB2FB3F430D31E3E553 /* DiagnosticsKit in Frameworks */ = {isa = PBXBuildFile; productRef = A9F21C8B3AF36183B2760A8F /* DiagnosticsKit */; };
 		26D8D8C210AD857F90A3F5DE /* TunerPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AA0D1C7F080AFA6812272FC /* TunerPanel.swift */; };
+		2B907D8ABDB2C97C6323734C /* ChordVerifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 750875AE181886BB42356EC1 /* ChordVerifierTests.swift */; };
 		301A7CEA087931D76BA96902 /* AppSectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E8D54AD92E8EB0EBEBCF8D7 /* AppSectionTests.swift */; };
 		3471E7910C0C9CCFF868EAA2 /* TuningTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D35F43E71514F9C6BCCEAA9 /* TuningTests.swift */; };
 		381FF00BEA650122561A8970 /* AppSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9ED9D1019D56C7784A3E6D /* AppSection.swift */; };
@@ -33,6 +37,8 @@
 		4F42DDB1193AA9B4EC839A64 /* GuitarToneSynth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CD62E79C5B792193ED0492B /* GuitarToneSynth.swift */; };
 		4F99BAC63145F5BC8DFCBBB9 /* FretPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF7673A494A1426E3CC538B /* FretPosition.swift */; };
 		55661B818261EBD97B726D9D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1C50EAEF6ED74AE3C1BA010A /* Assets.xcassets */; };
+		5613BA282D51CCA284E96D22 /* TestClipStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E26D7CBE6620E218BC2FA534 /* TestClipStoreTests.swift */; };
+		579BBFFA0E2A30C94AF39381 /* TestClipsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CDB83DA3C5D14D1DBDB855 /* TestClipsView.swift */; platformFilters = (ios, ); };
 		5E38C1DD951CEEF689F45F7C /* CloudSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DD2B9CA7A2B0F562499742C /* CloudSettings.swift */; };
 		5ED9CD5EC4E0B616820CC056 /* CardMerge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68F27ED64B32F841486F6D88 /* CardMerge.swift */; };
 		5F5A4DACBE9512A7A8FC76FA /* MasteryMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7625E41BD853814A402AE52A /* MasteryMap.swift */; };
@@ -46,16 +52,20 @@
 		6F610ABD708CAA262BB121DE /* MetronomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E2EA6413702E4EF06EF2008 /* MetronomeView.swift */; platformFilters = (macos, ); };
 		70E99BFB404732F98639053A /* FretboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5F79FFDB7F7F4771C848D1 /* FretboardView.swift */; };
 		7359F66F7F960C335B9BED3C /* GoalRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6BA473AECA7FD0B59EC1C67 /* GoalRing.swift */; };
+		74A3917D16E3B40311010E1C /* TestClipStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A9B00DE95C105B515F3780F /* TestClipStore.swift */; };
 		7E79850E7E222864D0EF5792 /* SwCharts in Frameworks */ = {isa = PBXBuildFile; productRef = 4171D3AB69B417D321ABB195 /* SwCharts */; };
 		80CBAC2345071DEF4D021DF3 /* Tuning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 621912ECF8D48B25B98788F0 /* Tuning.swift */; };
 		82F890261917C6251E5BF726 /* Fretboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA0E73674A7B74F8DF1240C /* Fretboard.swift */; };
 		8546DB96D44358C5912DEC6B /* FretboardLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B5B87566B8849BF190DB397 /* FretboardLayoutTests.swift */; };
 		8D07911442247E3F3B7E109B /* ChordChangePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55ACC52D9D54DF5C060F3EF /* ChordChangePanel.swift */; };
+		8F9003085D6381CEA8440F64 /* ChordVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6CF48E0C40AE17330492EDE /* ChordVerifier.swift */; };
 		90F7BB0474084E3DEED3CAD5 /* TunerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0BE7DC3D98EE16D81509B2 /* TunerView.swift */; platformFilters = (ios, ); };
 		91690FC270FA0EC84157A26D /* AudioInputSelecting+iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DEF7BD301BFA7D69B7A3993 /* AudioInputSelecting+iOS.swift */; platformFilters = (ios, ); };
 		9AB393A8E5F4C2D1BD54F38E /* TunerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CAAE23613B69E71D8B18167 /* TunerViewModel.swift */; };
 		9D4DEB9BAF4E09F2D4E0DB8E /* InputProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2FF0FD129F13FD54310597 /* InputProfile.swift */; };
+		9F911B8C47D39EF4C5475E49 /* StrumListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B2AA1DAB29B89434DEB603C /* StrumListener.swift */; };
 		A57D9CF5F6803E248E454821 /* ChordsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34B4BA4FBE7685CBEEBEE6D4 /* ChordsTests.swift */; };
+		AA2B117A639C74E1EC9248DB /* TestClipsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 306B57CE80BF14DF169A0700 /* TestClipsView.swift */; platformFilters = (macos, ); };
 		AADCBE903641D30D87C30296 /* CardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7022D2A0FE588E7342768063 /* CardStore.swift */; };
 		ABACD34D09B174283F6F9D19 /* AutoGrade.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05DF177F4B897C15A7CB9A9A /* AutoGrade.swift */; };
 		AFB2D32842D6300AB046764F /* SessionRunnerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04B464313891FD409EA27CAA /* SessionRunnerViewModel.swift */; };
@@ -106,6 +116,7 @@
 		05DF177F4B897C15A7CB9A9A /* AutoGrade.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoGrade.swift; sourceTree = "<group>"; };
 		0BC61C9FD4FFE745E87B9B2B /* ChordChangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordChangeView.swift; sourceTree = "<group>"; };
 		0D153AE1A3FB4CDD79949620 /* PracticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeView.swift; sourceTree = "<group>"; };
+		0F9B57509B291D8D4A87F29C /* TestClipPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestClipPanel.swift; sourceTree = "<group>"; };
 		113FCB817117BFE3AD6D1BAE /* PlaceholderScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceholderScreen.swift; sourceTree = "<group>"; };
 		1489D368EB99006DB6880862 /* MetronomePanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomePanel.swift; sourceTree = "<group>"; };
 		17277FB865ADE5AD5FEB8150 /* ChordVoicing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordVoicing.swift; sourceTree = "<group>"; };
@@ -119,6 +130,7 @@
 		2E2EA6413702E4EF06EF2008 /* MetronomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeView.swift; sourceTree = "<group>"; };
 		2E9FFDC02E1ECE9569DA16FA /* GuitarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuitarApp.swift; sourceTree = "<group>"; };
 		2F4175F8B1DBA7261C5201F7 /* ChordLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordLibrary.swift; sourceTree = "<group>"; };
+		306B57CE80BF14DF169A0700 /* TestClipsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestClipsView.swift; sourceTree = "<group>"; };
 		32D4CD1A53FB11B55A6E425E /* ClickSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClickSchedule.swift; sourceTree = "<group>"; };
 		348A300D2A71DEBA7F196556 /* TunerScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerScene.swift; sourceTree = "<group>"; };
 		34B4BA4FBE7685CBEEBEE6D4 /* ChordsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordsTests.swift; sourceTree = "<group>"; };
@@ -133,6 +145,7 @@
 		49E5C466E417A0173F641E8E /* ClickTrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClickTrack.swift; sourceTree = "<group>"; };
 		4A0BE7DC3D98EE16D81509B2 /* TunerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerView.swift; sourceTree = "<group>"; };
 		4A13DD993A8F5068DFFA4406 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
+		4B2AA1DAB29B89434DEB603C /* StrumListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrumListener.swift; sourceTree = "<group>"; };
 		5476CBB19C0DB8379150F716 /* TrainerHomePanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainerHomePanel.swift; sourceTree = "<group>"; };
 		5AA0D1C7F080AFA6812272FC /* TunerPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerPanel.swift; sourceTree = "<group>"; };
 		5B5B87566B8849BF190DB397 /* FretboardLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FretboardLayoutTests.swift; sourceTree = "<group>"; };
@@ -141,11 +154,13 @@
 		5F968CB5F92ED06E5CD87B2D /* FretboardDrill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FretboardDrill.swift; sourceTree = "<group>"; };
 		621912ECF8D48B25B98788F0 /* Tuning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tuning.swift; sourceTree = "<group>"; };
 		68F27ED64B32F841486F6D88 /* CardMerge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardMerge.swift; sourceTree = "<group>"; };
+		6A9B00DE95C105B515F3780F /* TestClipStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestClipStore.swift; sourceTree = "<group>"; };
 		6B851259D7A4BB81EDADF926 /* ChordChangeDrill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordChangeDrill.swift; sourceTree = "<group>"; };
 		6BA0E73674A7B74F8DF1240C /* Fretboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fretboard.swift; sourceTree = "<group>"; };
 		6DEF7BD301BFA7D69B7A3993 /* AudioInputSelecting+iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AudioInputSelecting+iOS.swift"; sourceTree = "<group>"; };
 		7022D2A0FE588E7342768063 /* CardStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardStore.swift; sourceTree = "<group>"; };
 		73FA503F46BA6A70301D599D /* SessionPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionPanel.swift; sourceTree = "<group>"; };
+		750875AE181886BB42356EC1 /* ChordVerifierTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordVerifierTests.swift; sourceTree = "<group>"; };
 		7625E41BD853814A402AE52A /* MasteryMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasteryMap.swift; sourceTree = "<group>"; };
 		7634026605F42E95E90628B3 /* MetronomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeView.swift; sourceTree = "<group>"; };
 		7D1A52C473FC9740C259224A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -161,12 +176,15 @@
 		AB2193A08DDEB9486382ACEE /* SettingsKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsKey.swift; sourceTree = "<group>"; };
 		B31D0E65DE20B25FB1B79E69 /* ChordChangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordChangeView.swift; sourceTree = "<group>"; };
 		B6BA473AECA7FD0B59EC1C67 /* GoalRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalRing.swift; sourceTree = "<group>"; };
+		B6CF48E0C40AE17330492EDE /* ChordVerifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordVerifier.swift; sourceTree = "<group>"; };
 		B8BFAE6AE3960DC0A6D7D6B2 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		BB9ED9D1019D56C7784A3E6D /* AppSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSection.swift; sourceTree = "<group>"; };
 		C49F6DC586D3111C2BF17D7D /* PracticeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeTests.swift; sourceTree = "<group>"; };
+		CB0317C831B21A977A8E7F63 /* TestClipViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestClipViewModel.swift; sourceTree = "<group>"; };
 		CCD3D75FAC41A6CBDEEB30CB /* ProgressScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressScreen.swift; sourceTree = "<group>"; };
 		D5A79B14923C874630805C56 /* PracticeSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeSession.swift; sourceTree = "<group>"; };
 		E10D2B89582B5CCD564F909E /* ProgressScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressScreen.swift; sourceTree = "<group>"; };
+		E26D7CBE6620E218BC2FA534 /* TestClipStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestClipStoreTests.swift; sourceTree = "<group>"; };
 		E364007389586A5F62AE3918 /* AudioInputSelecting+macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AudioInputSelecting+macOS.swift"; sourceTree = "<group>"; };
 		E4F92E687ACA7397D4369FA5 /* LogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogTests.swift; sourceTree = "<group>"; };
 		E834934CE6CF1F3B56D976BC /* TunerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerTests.swift; sourceTree = "<group>"; };
@@ -179,6 +197,8 @@
 		F0AE221E51467492D4A7D359 /* AudioInputSelecting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioInputSelecting.swift; sourceTree = "<group>"; };
 		F20BF819270185A8A2BF1C4E /* TunerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerView.swift; sourceTree = "<group>"; };
 		F4AFE5742BECD52865818D91 /* ToolsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolsView.swift; sourceTree = "<group>"; };
+		F52CE4FFCA5DCAA5E5D5FA0D /* StrumAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrumAnalyzer.swift; sourceTree = "<group>"; };
+		F7CDB83DA3C5D14D1DBDB855 /* TestClipsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestClipsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -375,6 +395,7 @@
 				A8DC868069F54A1C211B5CF2 /* FretboardDrillViewModel.swift */,
 				176A53EE3BFA2429F0C99745 /* MetronomeViewModel.swift */,
 				04B464313891FD409EA27CAA /* SessionRunnerViewModel.swift */,
+				CB0317C831B21A977A8E7F63 /* TestClipViewModel.swift */,
 				9CAAE23613B69E71D8B18167 /* TunerViewModel.swift */,
 			);
 			path = ViewModels;
@@ -429,6 +450,8 @@
 				EEC3E993CA19107109153952 /* AudioHub.swift */,
 				7022D2A0FE588E7342768063 /* CardStore.swift */,
 				7DD2B9CA7A2B0F562499742C /* CloudSettings.swift */,
+				4B2AA1DAB29B89434DEB603C /* StrumListener.swift */,
+				6A9B00DE95C105B515F3780F /* TestClipStore.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -438,11 +461,13 @@
 			children = (
 				1E8D54AD92E8EB0EBEBCF8D7 /* AppSectionTests.swift */,
 				34B4BA4FBE7685CBEEBEE6D4 /* ChordsTests.swift */,
+				750875AE181886BB42356EC1 /* ChordVerifierTests.swift */,
 				5B5B87566B8849BF190DB397 /* FretboardLayoutTests.swift */,
 				2BCACA5F3B4EE3FD51BF9A09 /* FretboardTests.swift */,
 				3CD62E79C5B792193ED0492B /* GuitarToneSynth.swift */,
 				E4F92E687ACA7397D4369FA5 /* LogTests.swift */,
 				C49F6DC586D3111C2BF17D7D /* PracticeTests.swift */,
+				E26D7CBE6620E218BC2FA534 /* TestClipStoreTests.swift */,
 				E834934CE6CF1F3B56D976BC /* TunerTests.swift */,
 				7D35F43E71514F9C6BCCEAA9 /* TuningTests.swift */,
 			);
@@ -454,7 +479,9 @@
 			children = (
 				6B851259D7A4BB81EDADF926 /* ChordChangeDrill.swift */,
 				2F4175F8B1DBA7261C5201F7 /* ChordLibrary.swift */,
+				B6CF48E0C40AE17330492EDE /* ChordVerifier.swift */,
 				17277FB865ADE5AD5FEB8150 /* ChordVoicing.swift */,
+				F52CE4FFCA5DCAA5E5D5FA0D /* StrumAnalyzer.swift */,
 			);
 			path = Chords;
 			sourceTree = "<group>";
@@ -480,6 +507,7 @@
 				5B8EDC43904980B2F887CCC4 /* PitchNeedle.swift */,
 				113FCB817117BFE3AD6D1BAE /* PlaceholderScreen.swift */,
 				73FA503F46BA6A70301D599D /* SessionPanel.swift */,
+				0F9B57509B291D8D4A87F29C /* TestClipPanel.swift */,
 				4180BF0E13CBDA44A31F2CA5 /* TodayPanel.swift */,
 				5476CBB19C0DB8379150F716 /* TrainerHomePanel.swift */,
 				5AA0D1C7F080AFA6812272FC /* TunerPanel.swift */,
@@ -522,6 +550,7 @@
 		BCDA67E35A0E145815FA0CDD /* Tools */ = {
 			isa = PBXGroup;
 			children = (
+				306B57CE80BF14DF169A0700 /* TestClipsView.swift */,
 				F4AFE5742BECD52865818D91 /* ToolsView.swift */,
 			);
 			path = Tools;
@@ -612,6 +641,7 @@
 		FBC22E8BBA2B579D4F91462D /* Tools */ = {
 			isa = PBXGroup;
 			children = (
+				F7CDB83DA3C5D14D1DBDB855 /* TestClipsView.swift */,
 				4938400A7419DD173D8086D6 /* ToolsView.swift */,
 			);
 			path = Tools;
@@ -725,12 +755,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				301A7CEA087931D76BA96902 /* AppSectionTests.swift in Sources */,
+				2B907D8ABDB2C97C6323734C /* ChordVerifierTests.swift in Sources */,
 				A57D9CF5F6803E248E454821 /* ChordsTests.swift in Sources */,
 				8546DB96D44358C5912DEC6B /* FretboardLayoutTests.swift in Sources */,
 				B5D37AFC1A1A8F53F212675B /* FretboardTests.swift in Sources */,
 				4F42DDB1193AA9B4EC839A64 /* GuitarToneSynth.swift in Sources */,
 				117F88BB77493B10E95B49AE /* LogTests.swift in Sources */,
 				FB8D3619CBD480156F5298DD /* PracticeTests.swift in Sources */,
+				5613BA282D51CCA284E96D22 /* TestClipStoreTests.swift in Sources */,
 				DE42746683E877068C3C7BD3 /* TunerTests.swift in Sources */,
 				3471E7910C0C9CCFF868EAA2 /* TuningTests.swift in Sources */,
 			);
@@ -755,6 +787,7 @@
 				B39B189A41988FE19FB0DEAD /* ChordChangeViewModel.swift in Sources */,
 				EAB24D0277FB44789ABDA5CB /* ChordGridView.swift in Sources */,
 				39CAF6ADC785B091459ED3B9 /* ChordLibrary.swift in Sources */,
+				8F9003085D6381CEA8440F64 /* ChordVerifier.swift in Sources */,
 				6B3FC114E8F207A1564ABC2F /* ChordVoicing.swift in Sources */,
 				E8491289CB6ACAAB1C6B10B1 /* ClickSchedule.swift in Sources */,
 				18251E0116C13678B3B839AF /* ClickTrack.swift in Sources */,
@@ -792,6 +825,13 @@
 				62796A2D00BAA49D8A7E9E97 /* SettingsView.swift in Sources */,
 				FCA8920BAF8160F57B866E96 /* SettingsView.swift in Sources */,
 				D69E259049131FF1A2237E81 /* SkillCard.swift in Sources */,
+				19DD423D24538C021FEAD135 /* StrumAnalyzer.swift in Sources */,
+				9F911B8C47D39EF4C5475E49 /* StrumListener.swift in Sources */,
+				08F30885A752D63EBF754FCE /* TestClipPanel.swift in Sources */,
+				74A3917D16E3B40311010E1C /* TestClipStore.swift in Sources */,
+				0DD96A40C4AA38033C40E2AC /* TestClipViewModel.swift in Sources */,
+				579BBFFA0E2A30C94AF39381 /* TestClipsView.swift in Sources */,
+				AA2B117A639C74E1EC9248DB /* TestClipsView.swift in Sources */,
 				CF96561698D8DBCBDA48D59D /* TodayPanel.swift in Sources */,
 				6E2EF237BD55C361440280F3 /* TodayView.swift in Sources */,
 				E599637FB2E66F07F31FA679 /* TodayView.swift in Sources */,

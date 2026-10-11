@@ -25,6 +25,11 @@ struct ToolsView: View {
             }
             Section("Support") {
                 NavigationLink {
+                    TestClipsView()
+                } label: {
+                    Label("Record a test clip", systemImage: "waveform.badge.mic")
+                }
+                NavigationLink {
                     DiagnosticsView()
                 } label: {
                     Label("Diagnostics", systemImage: "stethoscope")

@@ -1,12 +1,14 @@
 import SwiftUI
 import SwCharts
 
-/// Two chord grids, a one-minute timer, and one giant tap target to count changes.
+/// Two chord grids, a one-minute timer, and one giant tap target to count changes. With auto-count (beta)
+/// the mic counts and the grid of the chord being reached lights the strings that didn't ring.
 struct ChordChangePanel: View {
     @Bindable var model: ChordChangeViewModel
     var leftHanded: Bool
     @Bindable var metronome: MetronomeViewModel
     @AppStorage(SettingsKey.chordChartPeriod) private var period: ChartPeriod = .week
+    @Environment(\.openURL) private var openURL
     @State private var useClick = false
     @State private var showPicker = false
 
@@ -26,19 +28,19 @@ struct ChordChangePanel: View {
 
     private var chords: some View {
         HStack(spacing: 24) {
-            chord(model.first, isCurrent: model.phase == .running && model.showingFirst)
+            chord(model.first, isCurrent: model.phase == .running && model.showingFirst, highlight: model.showingFirst ? [] : model.highlightStrings)
             Image(systemName: "arrow.left.arrow.right").foregroundStyle(.secondary)
-            chord(model.second, isCurrent: model.phase == .running && !model.showingFirst)
+            chord(model.second, isCurrent: model.phase == .running && !model.showingFirst, highlight: model.showingFirst ? model.highlightStrings : [])
         }
         .frame(maxHeight: 190)
         .contentShape(Rectangle())
         .onTapGesture { if model.phase == .ready { showPicker = true } }
     }
 
-    private func chord(_ voicing: ChordVoicing, isCurrent: Bool) -> some View {
+    private func chord(_ voicing: ChordVoicing, isCurrent: Bool, highlight: Set<Int> = []) -> some View {
         VStack {
             Text(voicing.name).font(.title2.bold())
-            ChordGridView(voicing: voicing, leftHanded: leftHanded)
+            ChordGridView(voicing: voicing, leftHanded: leftHanded, highlightStrings: highlight)
         }
         .padding(8)
         .background(isCurrent ? Color.accentColor.opacity(0.15) : .clear, in: RoundedRectangle(cornerRadius: 12))
@@ -56,11 +58,80 @@ struct ChordChangePanel: View {
             }
             .buttonStyle(.borderedProminent).controlSize(.large)
             Button("Change chords…") { showPicker = true }.font(.footnote)
+            if model.isAuto {
+                Text("Auto-count (beta): the mic counts each clean change. Tap +1 to correct it.")
+                    .font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
+            }
             trend
         }
     }
 
+    @ViewBuilder
     private var running: some View {
+        if model.isAuto, let audio = model.audio {
+            autoRunning(audio)
+        } else {
+            tapRunning
+        }
+    }
+
+    /// The mic counts: the number, what the last strum sounded like, a correction button.
+    private func autoRunning(_ audio: AudioHub) -> some View {
+        VStack(spacing: 8) {
+            Text(Duration.seconds(model.remaining).formatted(.time(pattern: .minuteSecond))).font(.title.monospacedDigit()).foregroundStyle(.secondary)
+            Spacer(minLength: 0)
+            Text("\(model.changes)").font(.system(size: 96, weight: .bold, design: .rounded)).monospacedDigit().contentTransition(.numericText())
+            feedbackLine
+            Spacer(minLength: 0)
+            LevelMeter(level: audio.level).padding(.horizontal, 40)
+            micStatus(audio)
+            HStack(spacing: 16) {
+                Button { model.countChange() } label: { Text("+1").frame(minWidth: 80, minHeight: 44) }.buttonStyle(.bordered)
+                Button("Stop") { model.stop(); metronome.stop() }.frame(minHeight: 44)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var feedbackLine: some View {
+        if let feedback = model.feedback {
+            if feedback.counted {
+                Label(feedback.heard ?? "", systemImage: "checkmark.circle.fill").foregroundStyle(.green).font(.title3.bold())
+            } else if let heard = feedback.heard {
+                Text("\(heard) is clean — change now").foregroundStyle(.secondary).font(.title3)
+            } else if feedback.verdict.outcome == .partial {
+                Text("Missing: \(ChordChangePanel.stringNames(feedback.verdict.missing))").foregroundStyle(.orange).font(.title3)
+            } else {
+                Text("Didn't hear \(model.showingFirst ? model.second.name : model.first.name)").foregroundStyle(.orange).font(.title3)
+            }
+        } else {
+            Text("strum each chord").font(.footnote).foregroundStyle(.secondary)
+        }
+    }
+
+    @ViewBuilder
+    private func micStatus(_ audio: AudioHub) -> some View {
+        switch audio.status {
+        case .denied:
+            VStack(spacing: 4) {
+                Text("Microphone access is off. Tap +1 to count by hand.").font(.footnote).foregroundStyle(.secondary)
+                if let url = audio.privacySettingsURL { Button("Open Settings") { openURL(url) }.font(.footnote) }
+            }
+        case .unavailable(let reason):
+            Text(reason).font(.footnote).foregroundStyle(.secondary)
+        default:
+            EmptyView()
+        }
+    }
+
+    /// "B and G strings" from string numbers (1 = high E).
+    static func stringNames(_ strings: [Int]) -> String {
+        let names = [1: "high E", 2: "B", 3: "G", 4: "D", 5: "A", 6: "low E"]
+        let listed = strings.sorted().compactMap { names[$0] }
+        return listed.formatted(.list(type: .and)) + (listed.count == 1 ? " string" : " strings")
+    }
+
+    private var tapRunning: some View {
         VStack(spacing: 8) {
             Text(Duration.seconds(model.remaining).formatted(.time(pattern: .minuteSecond))).font(.title.monospacedDigit()).foregroundStyle(.secondary)
             Button {

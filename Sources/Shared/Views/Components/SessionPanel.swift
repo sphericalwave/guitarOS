@@ -73,7 +73,7 @@ struct SessionPanel: View {
                 ChordChangePanel(model: change, leftHanded: leftHanded, metronome: metronome)
                     .onChange(of: change.phase) {
                         if case .done(let result, _) = change.phase {
-                            runner.completeBlock(attempts: result.changes, correct: result.changes, score: result.changesPerMinute)
+                            runner.completeBlock(attempts: change.isAuto ? max(change.strums, result.changes) : result.changes, correct: result.changes, score: result.changesPerMinute)
                         }
                     }
             } else {
@@ -81,7 +81,8 @@ struct SessionPanel: View {
                     let names = (item.detail ?? "").split(separator: ">").map(String.init)
                     let first = names.first.flatMap(ChordLibrary.voicing(named:)) ?? ChordLibrary.voicing(named: ChordLibrary.defaultPair.0)!
                     let second = names.dropFirst().first.flatMap(ChordLibrary.voicing(named:)) ?? ChordLibrary.voicing(named: ChordLibrary.defaultPair.1)!
-                    let model = ChordChangeViewModel(first: first, second: second, context: runner.cards.context)
+                    let autoCount = UserDefaults.standard.bool(forKey: SettingsKey.autoCountChords)
+                    let model = ChordChangeViewModel(first: first, second: second, context: runner.cards.context, audio: autoCount ? audio : nil)
                     model.logsStandalone = false   // the session's block carries the result
                     change = model
                     metronome = MetronomeViewModel(bpm: Double(UserDefaults.standard.integer(forKey: SettingsKey.lastBPM)).nonZero ?? 100)

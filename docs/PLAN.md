@@ -479,9 +479,36 @@ on iPhone and Mac. **Shipped 2026-10-09 (PRs #1–#6).** Open user items: tune `
 CloudKit cross-device check, first Xcode build provisions signing, switch piano to PitchKit (separate PR).
 
 ### After MVP
-- **M6: Auto chord-change detection.** `ChordVerifier` (score-informed), strum onsets, per-string
-  feedback; synthetic strum tests. **Gate:** needs ~20 real clips (unplugged + USB) before it
-  replaces self-counting. The user doesn't have them yet; ask again when M5 ships.
+
+**M6: Auto chord-change detection (beta)** — done 2026-10-11 (PR #7 `m6-auto-chord-detection`)
+- [x] `StrumAnalyzer` (pure, `Shared/Engine/Chords`): raw input samples → one `Strum` per onset (PitchKit
+      `OnsetDetector` on a 4096 window, 512 hop). Frames 100–250 ms after the pick are judged with PitchKit's
+      `PolyphonicNoteEstimator` and the pair's pitches as `Prior.expected`; a note is present when the estimator
+      finds it in two frames **or** its fundamental stands as its own spectral peak (interpolated, ±35 cents,
+      sidelobe-rejected) with half the template bar of overtone energy (the greedy estimator drops chord tones
+      whose overtones a lower string claimed). Neighbouring frets are scored too so a wrong fret shows up;
+      neighbours that sit on a present chord tone's overtone are dropped.
+- [x] `ChordVerifier.verdict(heard:expected:)`: per-string present/missing (1 = high E), octave doublings
+      lenient, bass strict, `unexpected` = a note a fret or two off an expected string. `ChordChangeCounter`:
+      a change counts when the chord being reached is clean; strumming the held chord again doesn't.
+- [x] **Deviation from §3.3:** PitchKit's note-on events were tried first and are unusable for strums (a six-string
+      strum's note-ons trickle in over ~600 ms through the tracker), so the analyzer reads the samples itself
+      via a new `AudioHub.addFrameListener` input tap (one tap, fan-out, off the main actor). The click is not
+      yet in `Prior.suppressed` (it's unpitched; still on its own engine).
+- [x] `GuitarToneSynth` upgrades: triangle pluck + scrape noise (strong fundamentals like a real pick, pure
+      noise left some strings' fundamentals weak by chance), `inharmonicity` (all-pass in the loop), `release`
+      damping, `strum(voicing, muted:, release:)`. Tests: clean open C, muted string named, wrong fret reported,
+      C→G→G→C counts 2 with a repeat ignored, −45 dBFS strum, stiff strings in tune.
+- [x] **Behind `Settings → Auto-count chord changes (beta)`**, default off; self-counting stays the default.
+      With it on, the chord drill (standalone and in a session) shows the count, what the last strum sounded
+      like ("Missing: B string" / "C is clean — change now" / ✓ G), the missing strings in red on the grid of the
+      chord being reached, the level meter, and a +1 correction button. Blocks log strums as attempts.
+- [x] **Record a test clip** (Tools → Support): chord picker, guitar name (last-value placeholder), input shown,
+      5 s max recording of exactly what the hub hears (CAF + JSON label: chord, guitar, input, A, tuning,
+      date) in Application Support/TestClips; list, share one or all (ShareLink), swipe/context-menu delete.
+- [ ] **Gate (user):** record ~20 clips (unplugged + USB, several chords, a few deliberately muted) and hand
+      them over; then tune `StrumAnalyzer` on them and decide whether auto-count becomes the default.
+      Data survival: no schema change.
 - **M7: Scales/modes/CAGED.** Shape generator, `PlayAlongKit` extraction, wait mode + timed mode,
   speed trainer (+N BPM per clean pass), `scaleShape` cards.
 - **M8: Rhythm trainer.** Onset vs click, timing histogram, subdivision drills.

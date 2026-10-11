@@ -34,4 +34,8 @@ nonisolated enum SettingsKey {
     static let chordPair = "chordPair"
     /// Practice tab page: "notes" or "chords".
     static let practicePage = "practicePage"
+    /// Beta: the mic counts chord changes instead of the player. Off until it beats self-counting on real clips.
+    static let autoCountChords = "autoCountChords"
+    /// Name of the guitar typed for the last test clip, the field's placeholder.
+    static let testClipGuitar = "testClipGuitar"
 }
