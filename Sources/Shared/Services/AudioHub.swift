@@ -1,5 +1,6 @@
 import AVFoundation
 import Observation
+import Synchronization
 import DiagnosticsKit
 import PitchKit
 
@@ -42,6 +43,9 @@ final class AudioHub {
     @ObservationIgnored var onEvent: ((NoteEvent, TimeInterval) -> Void)?
     /// Asked as audio comes in for what the drill expects and what the app itself is playing.
     @ObservationIgnored var priorProvider: (() -> PolyphonicNoteEstimator.Prior)?
+    /// Gets every input buffer as it arrives, off the main thread, for analysis that needs the samples themselves
+    /// (strum verification, test-clip recording). The buffer's format gives the sample rate.
+    typealias FrameListener = @Sendable (AVAudioPCMBuffer, AVAudioTime) -> Void
 
     var privacySettingsURL: URL? { session.privacySettingsURL }
     var canSelectInputs: Bool { inputSelector.canSelectInputs }
@@ -55,6 +59,7 @@ final class AudioHub {
     @ObservationIgnored private var configurationObserver: NSObjectProtocol?
     @ObservationIgnored private var users = 0
     @ObservationIgnored private var capturedSince = Date.distantPast
+    @ObservationIgnored private let frames = FrameFanout()
 
     init(session: AudioRecordingSession, inputs: AudioInputSelecting,
          referenceA: Double = ReferencePitch.standard, inputProfile: InputProfile = .unpluggedElectric,
@@ -84,6 +89,18 @@ final class AudioHub {
     func retry() {
         guard users > 0, status != .listening, status != .starting else { return }
         Task { await start() }
+    }
+
+    /// Starts receiving input buffers; pair with `removeFrameListener`. Listening has to be acquired separately.
+    @discardableResult
+    func addFrameListener(_ listener: @escaping FrameListener) -> UUID {
+        let id = UUID()
+        frames.listeners.withLock { $0[id] = listener }
+        return id
+    }
+
+    func removeFrameListener(_ id: UUID) {
+        frames.listeners.withLock { $0[id] = nil }
     }
 
     func select(_ input: AudioInput) {
@@ -132,6 +149,11 @@ final class AudioHub {
         refreshRoute()
         let monitor = monitorInput && canMonitorInput
         let capture = try MicrophoneCapture(profile: inputProfile.detectorProfile(referenceA: referenceA), sensitivity: sensitivity, monitorInput: monitor)
+        // One tap feeds every frame listener; it only sees the fan-out, never the hub.
+        let frames = frames
+        capture.engine.inputNode.installTap(onBus: 0, bufferSize: 1024, format: nil) { buffer, time in
+            for listener in frames.listeners.withLock({ Array($0.values) }) { listener(buffer, time) }
+        }
         try capture.start()
         self.capture = capture
         capturedSince = .now
@@ -154,6 +176,7 @@ final class AudioHub {
         listener = nil
         if let configurationObserver { NotificationCenter.default.removeObserver(configurationObserver) }
         configurationObserver = nil
+        capture?.engine.inputNode.removeTap(onBus: 0)
         capture?.stop()
         capture = nil
         let now = AVAudioTime.seconds(forHostTime: mach_absolute_time())
@@ -209,4 +232,9 @@ final class AudioHub {
         if abs(meter - level) > 0.01 { level = meter }
         if let prior = priorProvider?() { capture?.setPrior(prior) }
     }
+}
+
+/// The frame listeners, shared with the input tap's block (which runs off the main actor).
+private final class FrameFanout: Sendable {
+    let listeners = Mutex<[UUID: AudioHub.FrameListener]>([:])
 }

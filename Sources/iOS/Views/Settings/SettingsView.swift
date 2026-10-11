@@ -6,6 +6,7 @@ struct SettingsView: View {
     @AppStorage(SettingsKey.leftHanded) private var leftHanded = false
     @AppStorage(SettingsKey.preferSharps) private var preferSharps = true
     @AppStorage(SettingsKey.tuning) private var tuningText = Tuning.standard.description
+    @AppStorage(SettingsKey.autoCountChords) private var autoCountChords = false
 
     var body: some View {
         Form {
@@ -18,6 +19,11 @@ struct SettingsView: View {
                 }
                 Toggle("Left-handed (mirror the neck)", isOn: $leftHanded)
                 Toggle("Spell with sharps", isOn: $preferSharps)
+            }
+            Section {
+                Toggle("Auto-count chord changes (beta)", isOn: $autoCountChords)
+            } footer: {
+                Text("The mic listens for each strum and counts the clean changes; the grid shows which string didn't ring. Self-counting stays the default until this proves itself on recorded test clips (Tools → Record a test clip).")
             }
         }
         
