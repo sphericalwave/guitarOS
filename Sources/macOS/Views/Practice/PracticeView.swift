@@ -39,6 +39,8 @@ struct PracticeView: View {
                 RhythmView()
             } else if page == "ear" {
                 EarView()
+            } else if page == "theory" {
+                TheoryView()
             } else {
                 TrainerHomePanel(mode: mode, scope: scope, fretboard: fretboard, leftHanded: leftHanded) { begin() }
             }
@@ -46,8 +48,8 @@ struct PracticeView: View {
         .toolbar {
             if drill == nil {
                 ToolbarItem(placement: .principal) {
-                    Picker("Practice", selection: $page) { Text("Notes").tag("notes"); Text("Chords").tag("chords"); Text("Scales").tag("scales"); Text("Rhythm").tag("rhythm"); Text("Ear").tag("ear") }
-                        .pickerStyle(.segmented).frame(width: 400)
+                    Picker("Practice", selection: $page) { Text("Notes").tag("notes"); Text("Chords").tag("chords"); Text("Scales").tag("scales"); Text("Rhythm").tag("rhythm"); Text("Ear").tag("ear"); Text("Theory").tag("theory") }
+                        .pickerStyle(.segmented).frame(width: 470)
                 }
             }
         }

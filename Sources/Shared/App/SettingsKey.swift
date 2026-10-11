@@ -47,6 +47,8 @@ nonisolated enum SettingsKey {
     /// Ear page: `EarDrill.Mode` raw value and level 1–4.
     static let earMode = "earMode"
     static let earLevel = "earLevel"
+    /// Theory page: `TheoryDrill.Kind` raw value.
+    static let theoryKind = "theoryKind"
     /// Beta: the mic counts chord changes instead of the player. Off until it beats self-counting on real clips.
     static let autoCountChords = "autoCountChords"
     /// Name of the guitar typed for the last test clip, the field's placeholder.

@@ -39,6 +39,8 @@ struct PracticeView: View {
                 RhythmView()
             } else if page == "ear" {
                 EarView()
+            } else if page == "theory" {
+                TheoryView()
             } else {
                 TrainerHomePanel(mode: mode, scope: scope, fretboard: fretboard, leftHanded: leftHanded) { begin() }
             }
@@ -52,6 +54,7 @@ struct PracticeView: View {
                         Label("Scales", systemImage: "waveform.path").tag("scales")
                         Label("Rhythm", systemImage: "metronome").tag("rhythm")
                         Label("Ear", systemImage: "ear").tag("ear")
+                        Label("Theory", systemImage: "text.book.closed").tag("theory")
                     }
                     .pickerStyle(.menu)
                 }
